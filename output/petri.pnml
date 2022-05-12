@@ -1,0 +1,219 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="net1" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <page id="n0">
+      <place id="Receive request_start">
+        <name>
+          <text>Receive request_start</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="Check thoroughly_start#Check casually_start">
+        <name>
+          <text>Check thoroughly_start#Check casually_start</text>
+        </name>
+      </place>
+      <place id="Check thoroughly">
+        <name>
+          <text>Check thoroughly</text>
+        </name>
+      </place>
+      <place id="Check thoroughly">
+        <name>
+          <text>Check thoroughly</text>
+        </name>
+      </place>
+      <place id="Decide_end#Notify about decision_start">
+        <name>
+          <text>Decide_end#Notify about decision_start</text>
+        </name>
+      </place>
+      <place id="Decide">
+        <name>
+          <text>Decide</text>
+        </name>
+      </place>
+      <place id="Notify about decision_end">
+        <name>
+          <text>Notify about decision_end</text>
+        </name>
+      </place>
+      <place id="End">
+        <name>
+          <text>End</text>
+        </name>
+      </place>
+      <place id="Receive status inquiry_start#Notify about status_end">
+        <name>
+          <text>Receive status inquiry_start#Notify about status_end</text>
+        </name>
+      </place>
+      <place id="Receive status inquiry_end#Notify about status_start">
+        <name>
+          <text>Receive status inquiry_end#Notify about status_start</text>
+        </name>
+      </place>
+      <place id="p_11">
+        <name>
+          <text>p_11</text>
+        </name>
+      </place>
+      <place id="Receive request">
+        <name>
+          <text>Receive request</text>
+        </name>
+      </place>
+      <place id="Receive request_end">
+        <name>
+          <text>Receive request_end</text>
+        </name>
+      </place>
+      <place id="Check thoroughly_end#Check casually_end#Decide_start">
+        <name>
+          <text>Check thoroughly_end#Check casually_end#Decide_start</text>
+        </name>
+      </place>
+      <transition id="Receive request">
+        <name>
+          <text>Receive chat message</text>
+        </name>
+      </transition>
+      <transition id="Check thoroughly">
+        <name>
+          <text>Open document</text>
+        </name>
+      </transition>
+      <transition id="Decide">
+        <name>
+          <text>Update DB</text>
+        </name>
+      </transition>
+      <transition id="Notify about decision">
+        <name>
+          <text>Send Email</text>
+        </name>
+      </transition>
+      <transition id="Receive status inquiry">
+        <name>
+          <text>Receive chat message</text>
+        </name>
+      </transition>
+      <transition id="Receive request">
+        <name>
+          <text>Receive Email</text>
+        </name>
+      </transition>
+      <transition id="Check casually">
+        <name>
+          <text>Access DB</text>
+        </name>
+      </transition>
+      <transition id="Decide">
+        <name>
+          <text>Access DB</text>
+        </name>
+      </transition>
+      <transition id="Notify about decision">
+        <name>
+          <text>Send chat message</text>
+        </name>
+      </transition>
+      <transition id="Notify about status">
+        <name>
+          <text>Send Email</text>
+        </name>
+      </transition>
+      <transition id="silent_3">
+        <name>
+          <text>silent_3</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="b01a71e2-a4ed-4dc4-8a4f-a0ff4e23ba8a"/>
+      </transition>
+      <transition id="Check thoroughly">
+        <name>
+          <text>Close document</text>
+        </name>
+      </transition>
+      <transition id="silent_6">
+        <name>
+          <text>silent_6</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="afbe5444-efad-4453-9ce7-9a78976d6b1d"/>
+      </transition>
+      <transition id="Notify about status">
+        <name>
+          <text>Send chat message</text>
+        </name>
+      </transition>
+      <transition id="Receive request">
+        <name>
+          <text>Create DB record</text>
+        </name>
+      </transition>
+      <transition id="silent_1">
+        <name>
+          <text>silent_1</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="bbb509b2-2033-49c7-8512-f49136c16fb0"/>
+      </transition>
+      <transition id="Check thoroughly">
+        <name>
+          <text>Access DB</text>
+        </name>
+      </transition>
+      <transition id="silent_11">
+        <name>
+          <text>silent_11</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="08f06c0d-fca2-44d4-a4ce-76c1169978f4"/>
+      </transition>
+      <transition id="Receive status inquiry">
+        <name>
+          <text>Receive Email</text>
+        </name>
+      </transition>
+      <arc id="4874274176" source="Receive request" target="Receive request"/>
+      <arc id="4874589568" source="Check thoroughly" target="Check thoroughly"/>
+      <arc id="4874590720" source="Decide" target="Decide"/>
+      <arc id="4874589952" source="Check thoroughly_start#Check casually_start" target="Check casually"/>
+      <arc id="4874591488" source="Notify about decision" target="Notify about decision_end"/>
+      <arc id="4874591872" source="silent_11" target="End"/>
+      <arc id="4874629760" source="Receive status inquiry_start#Notify about status_end" target="Receive status inquiry"/>
+      <arc id="4874630144" source="Receive status inquiry_end#Notify about status_start" target="Notify about status"/>
+      <arc id="4874630912" source="silent_6" target="Receive status inquiry_start#Notify about status_end"/>
+      <arc id="4874631008" source="p_11" target="silent_11"/>
+      <arc id="4874589472" source="Check thoroughly" target="Check thoroughly"/>
+      <arc id="4874590624" source="Decide" target="Decide"/>
+      <arc id="4874591392" source="Decide_end#Notify about decision_start" target="Notify about decision"/>
+      <arc id="4874629664" source="Receive status inquiry" target="Receive status inquiry_end#Notify about status_start"/>
+      <arc id="4874630432" source="Notify about status" target="Receive status inquiry_start#Notify about status_end"/>
+      <arc id="4874630816" source="p_11" target="silent_6"/>
+      <arc id="4874275136" source="Receive request" target="Receive request"/>
+      <arc id="4874274368" source="Receive request" target="Receive request"/>
+      <arc id="4874273984" source="Receive request_start" target="Receive request"/>
+      <arc id="4874589376" source="Check thoroughly" target="Check thoroughly"/>
+      <arc id="4874590528" source="Check thoroughly_end#Check casually_end#Decide_start" target="Decide"/>
+      <arc id="4874589760" source="Check thoroughly" target="Check thoroughly_end#Check casually_end#Decide_start"/>
+      <arc id="4874591296" source="Notify about decision" target="Notify about decision_end"/>
+      <arc id="4874591680" source="Notify about decision_end" target="silent_11"/>
+      <arc id="4874592064" source="silent_1" target="Receive status inquiry_start#Notify about status_end"/>
+      <arc id="4874629184" source="Receive status inquiry_start#Notify about status_end" target="silent_3"/>
+      <arc id="4874629568" source="Receive status inquiry_start#Notify about status_end" target="Receive status inquiry"/>
+      <arc id="4874547152" source="silent_1" target="Check thoroughly_start#Check casually_start"/>
+      <arc id="4874466016" source="Receive request_start" target="Receive request"/>
+      <arc id="4874589280" source="Check thoroughly_start#Check casually_start" target="Check thoroughly"/>
+      <arc id="4874589664" source="Check thoroughly" target="Check thoroughly"/>
+      <arc id="4874590048" source="Check casually" target="Check thoroughly_end#Check casually_end#Decide_start"/>
+      <arc id="4874590816" source="Decide" target="Decide_end#Notify about decision_start"/>
+      <arc id="4874591200" source="Decide_end#Notify about decision_start" target="Notify about decision"/>
+      <arc id="4874629856" source="Receive status inquiry" target="Receive status inquiry_end#Notify about status_start"/>
+      <arc id="4874630240" source="Notify about status" target="Receive status inquiry_start#Notify about status_end"/>
+      <arc id="4874630336" source="Receive status inquiry_end#Notify about status_start" target="Notify about status"/>
+      <arc id="4874630624" source="silent_3" target="p_11"/>
+      <arc id="4874499312" source="Receive request" target="Receive request_end"/>
+      <arc id="4874500464" source="Receive request_end" target="silent_1"/>
+    </page>
+  </net>
+</pnml>

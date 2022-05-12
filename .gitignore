@@ -1,0 +1,11 @@
+venv/
+venvn/
+env/
+.idea/
+__pycache__/
+input/*
+input*.xes
+input/*.pkl
+output/*.pkl
+output/*.xes
+.DS_Store
