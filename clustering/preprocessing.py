@@ -19,16 +19,17 @@ def pca(pd_events_fv):
     return pca_df, pca_rep
 
 
-def viz(pca_df):
+def viz(pca_df, color_att=None, with_annots=True):
+    clr = color_att if color_att else XES_NAME_DF_NUM
     plt.figure(figsize=(30, 30), dpi=300)
     plt.scatter(pca_df["x"], pca_df["y"],
-                c=pca_df[XES_NAME_DF_NUM].tolist(),
+                c=pca_df[clr].tolist(),
                 # label=tsne_df["variant"].tolist(),
                 s=1)
-
-    for idx, row in pca_df.iterrows():
-        #print(row[annotate_attr])
-        plt.annotate(str(int(row[XES_NAME_DF_NUM])),
-                     (row["x"], row["y"]),
-                     fontsize=3,
-                     weight="bold")
+    if with_annots:
+        for idx, row in pca_df.iterrows():
+            #print(row[annotate_attr])
+            plt.annotate(str(int(row[clr])),
+                         (row["x"], row["y"]),
+                         fontsize=3,
+                         weight="bold")

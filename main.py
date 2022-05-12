@@ -10,7 +10,7 @@ from config import Config
 from const import CLUST_COL
 from read import reader
 
-config = Config("input/", "output/", "MPPNTaskAbstractionMobIS_pd_cases_fv_fine_1", clust="k_means")
+config = Config("input/", "output/", "MPPNTaskAbstractionMobIS_pd_cases_fv_fine_1", clust="k_means", noise_tau=0)
 
 
 def main():
@@ -29,11 +29,11 @@ def main():
         pd_events_fv[CLUST_COL] = clust.pred_labels
 
         # Compute key properties
-        props = PropertyComputer(pd_events_fv)
+        props = PropertyComputer(pd_events_fv, config)
         props.compute_props_for_clusters()
 
         # Generate cluster descriptions
-        text_gen = TextGen(pd_events_fv, props.clust_to_prop)
+        text_gen = TextGen(pd_events_fv, props.clust_to_prop, config)
         text_gen.generate_descriptions_for_clusters()
 
         for clust, clust_description in text_gen.description.items():
