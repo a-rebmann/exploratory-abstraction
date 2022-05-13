@@ -7,14 +7,18 @@ from clustering import preprocessing
 from clustering.clusterer import Clusterer
 from clustering.retrieve import compute_similarities, retrieve_most_similar_events
 from config import Config
-from const import CLUST_COL
+from const import *
 from read import reader
 
-config = Config("input/", "output/", "MPPNTaskAbstractionMobIS_pd_cases_fv_fine_1", clust="k_means", noise_tau=0)
+config = Config("input/", "output/", "Mobis.csv",
+                {XES_CASE: "trace_id", XES_NAME: "activity", XES_ROLE: "type", XES_RESOURCE: "user", XES_TIME: "timestamp"},
+                "MPPNTaskAbstractionMobIS_pd_cases_fv_fine_1", clust="k_means", noise_tau=0, multi_clustering=True)
 
 
 def main():
-    # first read the representations leaned
+    # first read the raw log
+    pd_log = reader.read_csv_log(config)
+    # then read the representations leaned
     pd_events_fv, loaded = reader.load_mppn_representations(config)
     if loaded:
         # Do PCA
@@ -26,18 +30,24 @@ def main():
         # TODO how to set number of clusters?
         # TODO how to rank different clusters?
         clust.cluster(pca_rep, 27)
-        pd_events_fv[CLUST_COL] = clust.pred_labels
+
+        # Since k means is fast we can create multiple clusterings and use alternative options to present to the user
+        if config.multi_clustering:
+            for clust_num, pred_labels in clust.pred_labels.items():
+                pd_events_fv[CLUST_COL+str(clust_num)] = pred_labels[clust_num]
+        else:
+            pd_events_fv[CLUST_COL] = clust.pred_labels
 
         # Compute key properties
-        props = PropertyComputer(pd_events_fv, config)
+        props = PropertyComputer(pd_events_fv, pd_log, config, clust)
         props.compute_props_for_clusters()
 
         # Generate cluster descriptions
         text_gen = TextGen(pd_events_fv, props.clust_to_prop, config)
         text_gen.generate_descriptions_for_clusters()
 
-        for clust, clust_description in text_gen.description.items():
-            print(clust, clust_description)
+        for clust_num, clust_description in text_gen.description.items():
+            print(clust_num, clust_description)
 
 
         # Get similar events

@@ -10,14 +10,17 @@ SET_RES = "resources"
 
 class PropertyComputer:
 
-    def __init__(self, pd_events_fv, config):
+    def __init__(self, pd_events_fv, pd_log, config, clust):
         self.pd_events_fv = pd_events_fv
+        self.pd_log = pd_log
         self._clust_to_prop = None
         self.config = config
+        self.clust = clust
 
     def compute_props_for_clusters(self):
         clust_to_props = {}
-        for clust, events in self.pd_events_fv.groupby(CLUST_COL):
+        col_name = CLUST_COL+str(self.clust.elbow) if self.config.multi_clustering else CLUST_COL
+        for clust, events in self.pd_events_fv.groupby(col_name):
             event_types = []
             resources = []
             roles = []
@@ -29,9 +32,9 @@ class PropertyComputer:
             all_group_durs = []
             ev_per_case = []
             for case, events_per_case in events.groupby(XES_CASE):
-                #print(case)
+                # print(case)
                 indices = events_per_case[EVENT_POS_IN_CASE].tolist()
-                #print(indices)
+                # print(indices)
                 ev_per_case.append(len(events_per_case))
                 if len(events_per_case) < 1:
                     continue
@@ -50,23 +53,13 @@ class PropertyComputer:
                 max_idx = max(indices)
                 # check which types of events can happen before or after a group in a case
                 if min_idx > 0:
-                    preceded_by.append(case_full_all.iloc[min_idx-1][XES_NAME])
-                if max_idx < len(case_full_all)-1:
-                    followed_by.append(case_full_all.iloc[max_idx+1][XES_NAME])
+                    preceded_by.append(case_full_all.iloc[min_idx - 1][XES_NAME])
+                if max_idx < len(case_full_all) - 1:
+                    followed_by.append(case_full_all.iloc[max_idx + 1][XES_NAME])
 
-
-            # for row in events.itertuples():
-            #     try:
-            #         preceded_by.append(row[COL_INDEX_TRACE].iloc[row[COL_INDEX_POS] - 1][XES_NAME])
-            #     except:
-            #         pass
-            #     try:
-            #         followed_by.append(row[COL_INDEX_TRACE].iloc[row[COL_INDEX_POS] + 1][XES_NAME])
-            #     except:
-            #         pass
             min_dur_per_case = min(all_group_durs)
             max_dur_per_case = max(all_group_durs)
-            avg_dur_per_case = sum(all_group_durs, datetime.timedelta(0)) / len(all_group_durs)
+            #avg_dur_per_case = sum(all_group_durs, datetime.timedelta(0)) / len(all_group_durs)
 
             event_types_set = set(event_types)
             resources_set = set(resources)
@@ -81,42 +74,33 @@ class PropertyComputer:
             followed_by_set = set(followed_by)
 
             # distribution of event types
-            unique, counts = np.unique(event_types, return_counts=True)
-            distribution = dict(zip(unique, counts))
-            max_num = max(distribution.values())
-            #print("*"*20, clust, "*"*20)
-            for et, cnt in distribution.items():
-                #print(et, cnt, max_num)
-                if cnt < self.config.noise_tau * max_num:
-                    event_types_set.remove(et)
+            self.remove_noise(event_types, event_types_set, XES_NAME, clust)
 
             # distribution of resources
-            unique, counts = np.unique(resources, return_counts=True)
-            distribution = dict(zip(unique, counts))
-            max_num = max(distribution.values())
-            #print("*" * 20, clust, "*" * 20)
-            for res, cnt in distribution.items():
-                if cnt < self.config.noise_tau * max_num:
-                    resources_set.remove(res)
-                    #print(res, cnt)
+            self.remove_noise(resources, resources_set, XES_RESOURCE, clust)
+
             # distribution of roles
-            unique, counts = np.unique(roles, return_counts=True)
-            distribution = dict(zip(unique, counts))
-            max_num = max(distribution.values())
-            #print("*" * 20, clust, "*" * 20)
-            for res, cnt in distribution.items():
-                if cnt < self.config.noise_tau * max_num:
-                    roles_set.remove(res)
-                    #print(res, cnt)
-
-
-
+            self.remove_noise(roles, roles_set, XES_ROLE, clust)
 
             clust_to_props[clust] = event_types_set, resources_set, roles_set, cat_atts, num_atts, \
                                     preceded_by_set, followed_by_set, \
-                                    min_dur_per_case, max_dur_per_case, avg_dur_per_case, ev_per_case
+                                    min_dur_per_case, max_dur_per_case, 0, ev_per_case
 
         self._clust_to_prop = clust_to_props
+
+    def remove_noise(self, group_props, group_prop_set, att, clust):
+        unique, counts = np.unique(group_props, return_counts=True)
+        distribution_group = dict(zip(unique, counts))
+
+        unique, counts = np.unique(self.pd_log[att], return_counts=True)
+        distribution_log = dict(zip(unique, counts))
+
+        max_num_group = max(distribution_group.values())
+        max_num_log = max(distribution_log.values())
+
+        for et, cnt in distribution_group.items():
+            if (cnt / distribution_log[et]) < (self.config.noise_tau * (max_num_group / max_num_log)):
+                group_prop_set.remove(et)
 
     @property
     def clust_to_prop(self):

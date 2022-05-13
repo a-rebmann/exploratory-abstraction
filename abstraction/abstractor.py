@@ -164,11 +164,25 @@ def recurse(events, df, case, prefixes, targets, ignore=[], only_complete=False)
             recurse(events, sp_group, case, next_label, new_targets, ignore=ignore, only_complete=only_complete)
 
 
+# TODO how to handle multiple instances of the same activity within a trace? TODO build pojection and abstraction
+#  functions (retain only events per case, replace these with only one start and one complete event
 class Abstractor:
     """
     applies the selected groups to the input event log to create an abstracted event log
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, pd_events_fv, pd_log, config, selection, group_indicator_col):
+        self.pd_events_fv = pd_events_fv
+        self.pd_log = pd_log
+        self.config = config
+        self.selection = selection
+        self.group_indicator_col = group_indicator_col
+
+    def apply_abstraction(self):
+        abstracted_log = self.pd_log.copy()
+        for group, events in self.pd_events_fv.groupby(self.group_indicator_col):
+            # in each case retain only the first and last event of each group
+            for case, in_case in events.groupby(XES_CASE):
+                pass
+
 
