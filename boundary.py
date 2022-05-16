@@ -43,5 +43,5 @@ st.plotly_chart(fig, use_container_width=True)
 
 container = st.container()
 for clust_num, clust_description in result.description.items():
-    container.write("## Description of event group ", clust_num)
+    container.write("## Description of event group " + clust_num)
     container.write(clust_description)
