@@ -3,7 +3,7 @@ venvn/
 env/
 .idea/
 __pycache__/
-input/*
+#input/*
 input*.xes
 #input/*.pkl
 output/*.pkl
