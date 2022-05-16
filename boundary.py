@@ -37,7 +37,7 @@ clr = XES_NAME_DF_NUM
 #px.figure(figsize=(30, 30), dpi=300)
 fig = px.scatter(result.pca, x="x", y="y", color=clr, width=800, height=800)
 
-st.header('Event representation space of the ', result.config.log_name, ' event log')
+st.header('Event representation space of the '+ result.config.log_name+ ' event log')
 # Plot!
 st.plotly_chart(fig, use_container_width=True)
 
