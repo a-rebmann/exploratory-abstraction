@@ -26,12 +26,12 @@ from read import reader
 from clustering import preprocessing
 from clustering.clusterer import Clusterer
 from config import Config
+import plotly.express as px
 # the config object
 config = Config("input/", "output/", "Mobis.csv", dict(), "MPPNTaskAbstractionMobIS_pd_cases_fv_fine_1", clust="k_means")
 
 # Get event representations from disk
 pd_events_fv, loaded = reader.load_mppn_representations(config)
-
 
 
 pca_df, pca_rep = preprocessing.pca(pd_events_fv)
@@ -45,7 +45,6 @@ print("Clustering done")
 pd_events_fv[CLUST_COL] = clust.pred_labels
 pca_df[CLUST_COL] = clust.pred_labels
 
-import plotly.express as px
 
 clr = XES_NAME_DF_NUM
 #px.figure(figsize=(30, 30), dpi=300)
