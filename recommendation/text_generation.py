@@ -13,10 +13,11 @@ EVENTS_PER_CASE = "There are {num} events per case {addition}. "
 
 class TextGen:
 
-    def __init__(self, pd_events_fv, clust_to_prop, config):
+    def __init__(self, pd_events_fv, pca, clust_to_prop, config):
         self.pd_events_fv = pd_events_fv
         self.clus_to_prop = clust_to_prop
         self._description = {}
+        self.pca = pca
         self.config = config
 
     def generate_descriptions_for_clusters(self):

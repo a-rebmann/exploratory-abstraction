@@ -9,6 +9,7 @@ from clustering.retrieve import compute_similarities, retrieve_most_similar_even
 from config import Config
 from const import *
 from read import reader
+from write import writer
 
 config = Config("input/", "output/", "Mobis.csv",
                 {XES_CASE: "trace_id", XES_NAME: "activity", XES_ROLE: "type", XES_RESOURCE: "user", XES_TIME: "timestamp"},
@@ -22,8 +23,8 @@ def main():
     pd_events_fv, loaded = reader.load_mppn_representations(config)
     if loaded:
         # Do PCA
-        pca, pca_rep = preprocessing.pca(pd_events_fv)
-        preprocessing.viz(pca)
+        pca_df, pca_rep = preprocessing.pca(pd_events_fv)
+        #preprocessing.viz(pca)
 
         # Cluster
         clust = Clusterer(pd_events_fv, config)
@@ -43,13 +44,13 @@ def main():
         props.compute_props_for_clusters()
 
         # Generate cluster descriptions
-        text_gen = TextGen(pd_events_fv, props.clust_to_prop, config)
+        text_gen = TextGen(pd_events_fv, pca_df, props.clust_to_prop, config)
         text_gen.generate_descriptions_for_clusters()
 
         for clust_num, clust_description in text_gen.description.items():
             print(clust_num, clust_description)
 
-
+        writer.write_result_to_disk(config, text_gen)
         # Get similar events
         #pd_events_fv = compute_similarities(pd_events_fv)
         # Retrieve most similar events

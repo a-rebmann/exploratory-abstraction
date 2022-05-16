@@ -17,7 +17,7 @@ def load_mppn_representations(config):
 
 
 def read_csv_log(config):
-    pd_log = pd.read_csv(config.in_path+config.log_name, sep=",", engine="python")
+    pd_log = pd.read_csv(config.in_path + config.log_name, sep=",", engine="python")
     """check if given column names exist in log and rename them"""
     must_have = [config.att_names[XES_CASE], config.att_names[XES_NAME], config.att_names[XES_TIME]]
     not_exist_str = " does not exist as column name"
@@ -37,3 +37,12 @@ def read_csv_log(config):
         pd_log.rename(columns={config.att_names[XES_ROLE]: XES_ROLE}, inplace=True)
 
     return pd_log
+
+
+def load_result(config):
+    try:
+        with open(os.path.join(config.in_path, config.rep_name + '_result.pkl'), 'rb') as f:
+            pickled_res = pickle.load(f)
+            return pickled_res, True
+    except FileNotFoundError:
+        return None, False

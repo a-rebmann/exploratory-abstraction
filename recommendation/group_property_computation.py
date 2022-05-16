@@ -72,15 +72,16 @@ class PropertyComputer:
             print("followed", distribution)
             preceded_by_set = set(preceded_by)
             followed_by_set = set(followed_by)
+            if self.config.noise_tau > 0:
 
-            # distribution of event types
-            self.remove_noise(event_types, event_types_set, XES_NAME, clust)
+                # distribution of event types
+                self.remove_noise(event_types, event_types_set, XES_NAME, clust)
 
-            # distribution of resources
-            self.remove_noise(resources, resources_set, XES_RESOURCE, clust)
+                # distribution of resources
+                self.remove_noise(resources, resources_set, XES_RESOURCE, clust)
 
-            # distribution of roles
-            self.remove_noise(roles, roles_set, XES_ROLE, clust)
+                # distribution of roles
+                self.remove_noise(roles, roles_set, XES_ROLE, clust)
 
             clust_to_props[clust] = event_types_set, resources_set, roles_set, cat_atts, num_atts, \
                                     preceded_by_set, followed_by_set, \
