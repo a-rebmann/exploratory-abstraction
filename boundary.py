@@ -31,7 +31,7 @@ import plotly.express as px
 config = Config("input/", "output/", "Mobis.csv", dict(), "MPPNTaskAbstractionMobIS_pd_cases_fv_fine_1", clust="k_means")
 
 
-result = reader.load_result(config)
+result, loaded = reader.load_result(config)
 
 clr = XES_NAME_DF_NUM
 #px.figure(figsize=(30, 30), dpi=300)
