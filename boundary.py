@@ -38,12 +38,17 @@ clr = XES_NAME_DF
 #px.figure(figsize=(30, 30), dpi=300)
 fig = px.scatter(result.pca, x="x", y="y", color=clr, width=800, height=800)
 
-st.header('Events of the ' + result.config.log_name + ' log')
-# Plot!
-st.plotly_chart(fig, use_container_width=True)
+st.header('Exploratory Event Abstraction')
+st.subheader('Event group recommendation for the ' + result.config.log_name + ' log')
 
-container = st.container()
-for clustering in result.description.keys():
-    for clust_num, clust_description in result.description[clustering].items():
-        container.write("### Description of event group " + str(clust_num))
-        container.write(clust_description)
+col1, col2 = st.columns(2)
+with col1:
+    # Plot!
+    st.plotly_chart(fig, use_container_width=True)
+
+with col2:
+    container = st.container()
+    for clustering in result.description.keys():
+        for clust_num, clust_description in result.description[clustering].items():
+            container.write("### Description of event group " + str(clust_num))
+            container.write(clust_description)
