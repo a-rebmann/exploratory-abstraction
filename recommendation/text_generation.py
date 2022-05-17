@@ -52,25 +52,29 @@ class TextGen:
             if len(event_types) == 1:
                 text = 'All events are of the ' + str(event_types).replace("{","").replace("}","") + ' type'
             else:
-                text += 'These are ' + str(event_types)
+                text += 'These are ' + str(event_types).replace("{","").replace("}","")
         self._description[clustering][clust] += text
 
     def generate_resources_text(self, clustering, clust, resources):
         text = COUNT_RES_TEMPLATE.format(name="resources", count=len(resources))
+        if 'None' in resources:
+            resources.remove('None')
         if len(resources) < 5:
             if len(resources) == 1:
                 text = 'All events are of executed by ' + str(resources).replace("{","").replace("}","")
             else:
-                text += 'These are ' + str(resources)
+                text += 'These are ' + str(resources).replace("{","").replace("}","")
         self._description[clustering][clust] += text
 
     def generate_roles_text(self, clustering, clust, roles):
         text = COUNT_RES_TEMPLATE.format(name="roles", count=len(roles))
+        if 'None' in roles:
+            roles.remove('None')
         if len(roles) < 3:
             if len(roles) == 1:
                 text = 'All events are of executed by the ' + str(roles).replace("{","").replace("}","") + ' role'
             else:
-                text += 'These are ' + str(roles)
+                text += 'These are ' + str(roles).replace("{","").replace("}","")
         self._description[clustering][clust] += text
 
 
