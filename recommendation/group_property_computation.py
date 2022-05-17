@@ -69,17 +69,17 @@ class PropertyComputer:
 
             min_dur_per_case = min(all_group_durs)
             max_dur_per_case = max(all_group_durs)
-            # avg_dur_per_case = sum(all_group_durs, datetime.timedelta(0)) / len(all_group_durs)
+            #avg_dur_per_case = sum(all_group_durs, datetime.timedelta(0)) / len(all_group_durs)
 
             event_types_set = set(event_types)
             resources_set = set(resources)
             roles_set = set(roles)
             unique, counts = np.unique(preceded_by, return_counts=True)
             distribution = dict(zip(unique, counts))
-            print("preceded", distribution)
+            # print("preceded", distribution)
             unique, counts = np.unique(followed_by, return_counts=True)
             distribution = dict(zip(unique, counts))
-            print("followed", distribution)
+            # print("followed", distribution)
             preceded_by_set = set(preceded_by)
             followed_by_set = set(followed_by)
             if self.config.noise_tau > 0:
@@ -91,6 +91,12 @@ class PropertyComputer:
 
                 # distribution of roles
                 self.remove_noise(roles, roles_set, XES_ROLE, clust)
+
+                # distribution of preceeding
+                self.remove_noise(preceded_by, preceded_by_set, XES_NAME, clust)
+
+                # distribution of following
+                self.remove_noise(followed_by, followed_by_set, XES_NAME, clust)
 
             clust_to_props[clust] = event_types_set, resources_set, roles_set, cat_atts, num_atts, \
                                     preceded_by_set, followed_by_set, \

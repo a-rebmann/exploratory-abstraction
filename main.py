@@ -13,7 +13,7 @@ from write import writer
 
 config = Config("input/", "output/", "Mobis.csv",
                 {XES_CASE: "case", XES_NAME: "activity", XES_ROLE: "type", XES_RESOURCE: "user", XES_TIME: "start"},
-                "MPPNTaskAbstractionMobIS_pd_cases_fv_fine_1", clust="k_means", noise_tau=0, multi_clustering=True)
+                "MPPNTaskAbstractionMobIS_pd_cases_fv_fine_1", clust="k_means", noise_tau=0.05, multi_clustering=True)
 
 
 def main():
@@ -44,12 +44,12 @@ def main():
         # Compute key properties
         props = PropertyComputer(pd_events_fv, pd_log, config, clust)
         props.compute_props_for_clusters()
-        print(len(props.clust_to_prop))
-        print(props.clust_to_prop)
+        #print(len(props.clust_to_prop))
+        #print(props.clust_to_prop)
         # Generate cluster descriptions
         text_gen = TextGen(pd_events_fv, pca_df, props.clust_to_prop, config)
         text_gen.generate_descriptions_for_clusters()
-        print(text_gen.description)
+        #print(text_gen.description)
         for clustering in text_gen.description.keys():
             for clust_num, clust_description in text_gen.description[clustering].items():
                 print(clust_num, clust_description)

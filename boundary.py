@@ -50,5 +50,5 @@ with col2:
     container = st.container()
     for clustering in result.description.keys():
         for clust_num, clust_description in result.description[clustering].items():
-            container.write("### Description of event group " + str(clust_num))
+            container.write("<b>Description of event group " + str(clust_num+1)+"</b")
             container.write(clust_description)

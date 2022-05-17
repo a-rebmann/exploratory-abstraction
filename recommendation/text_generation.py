@@ -48,14 +48,29 @@ class TextGen:
 
     def generate_event_types_text(self, clustering, clust, event_types):
         text = COUNT_TEMPLATE.format(name="event types", count=len(event_types))
+        if len(event_types) < 5:
+            if len(event_types) == 1:
+                text = 'All events are of the ' + str(event_types).replace("{","").replace("}","") + ' type'
+            else:
+                text += 'These are ' + str(event_types)
         self._description[clustering][clust] += text
 
     def generate_resources_text(self, clustering, clust, resources):
         text = COUNT_RES_TEMPLATE.format(name="resources", count=len(resources))
+        if len(resources) < 5:
+            if len(resources) == 1:
+                text = 'All events are of executed by ' + str(resources).replace("{","").replace("}","")
+            else:
+                text += 'These are ' + str(resources)
         self._description[clustering][clust] += text
 
     def generate_roles_text(self, clustering, clust, roles):
         text = COUNT_RES_TEMPLATE.format(name="roles", count=len(roles))
+        if len(roles) < 3:
+            if len(roles) == 1:
+                text = 'All events are of executed by the ' + str(roles).replace("{","").replace("}","") + ' role'
+            else:
+                text += 'These are ' + str(roles)
         self._description[clustering][clust] += text
 
 
@@ -74,10 +89,19 @@ class TextGen:
     def generate_duration_text(self, clustering, clust, min_dur_per_case, max_dur_per_case, avg_dur_per_case):
         if max_dur_per_case == timedelta(seconds=0):
             return
+        # min_dur_per_case = (str(min_dur_per_case.days) + " days " if min_dur_per_case.days > 0 else "") + \
+        #                    (str(min_dur_per_case.hours) + " hours " if min_dur_per_case.seconds//3600 > 0 else "") + \
+        #                    (str(min_dur_per_case.minutes) + " minutes " if min_dur_per_case.minutes > 0 else "") +\
+        #                    (str(min_dur_per_case.seconds) + " seconds"if min_dur_per_case.seconds > 0 else "")
+        # max_dur_per_case = str(max_dur_per_case.days) + " days " + str(max_dur_per_case.hours) + " hours " + str(
+        #     max_dur_per_case.minutes) + " minutes " + str(max_dur_per_case.seconds) + " seconds"
+        if min_dur_per_case == timedelta(seconds=0):
+            min_dur_per_case = "O seconds"
+
         text = DURATION_TEMPLATE_RANGE.format(dur="duration", min_value=min_dur_per_case, max_value=max_dur_per_case)
         self._description[clustering][clust] += text
-        text = DURATION_TEMPLATE.format(dur="average duration", value=avg_dur_per_case)
-        self._description[clustering][clust] += text
+        # text = DURATION_TEMPLATE.format(dur="average duration", value=avg_dur_per_case) #TODO average
+        # self._description[clustering][clust] += text
 
     @property
     def description(self):

@@ -32,8 +32,11 @@ def read_csv_log(config):
                   inplace=True)
     if config.att_names[XES_RESOURCE] in pd_log.columns:
         pd_log.rename(columns={config.att_names[XES_RESOURCE]: XES_RESOURCE}, inplace=True)
+        pd_log[XES_RESOURCE] = pd_log[XES_RESOURCE].fillna("None").astype(str)
+        #print(pd_log[XES_RESOURCE].unique())
     if config.att_names[XES_ROLE] in pd_log.columns:
         pd_log.rename(columns={config.att_names[XES_ROLE]: XES_ROLE}, inplace=True)
+        pd_log[XES_ROLE] = pd_log[XES_ROLE].fillna("None").astype(str)
 
     return pd_log
 
