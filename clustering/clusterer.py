@@ -3,6 +3,7 @@ from sklearn.cluster import AgglomerativeClustering, KMeans, DBSCAN
 from sklearn.cluster import AffinityPropagation
 from sklearn.metrics import silhouette_score
 import hdbscan
+from const import *
 
 from sklearn import preprocessing
 
@@ -33,7 +34,7 @@ class Clusterer:
         :metric: the metric for the clusterer
         """
         if self.config.clust == 'k_means':
-            self._pred_labels = self.k_means(vectors, n_clusters, all_labels=self.config.multi_clustering)
+            self._pred_labels = self.k_means(vectors, n_clusters)
         elif self.config.clust == 'agglomerative':
             self._pred_labels = self.agglomerative(vectors, n_clusters)
         elif self.config.clust == 'h_dbscan':
@@ -55,13 +56,12 @@ class Clusterer:
         return distribution
 
     # K-Means
-    def k_means(self, vectors, n_clusters, all_labels=False):
+    def k_means(self, vectors, n_clusters):
         vector_norm = vectors
         sils = dict()
         wcss = dict()
         temp_labels = dict()
-        curr_clust = n_clusters
-        for curr_clust in range(2, n_clusters*2, 25):
+        for curr_clust in range(int(len(self.pd_events_fv[XES_NAME_DF].unique())*.5), int(n_clusters*1.5), 3):
             kms = KMeans(n_clusters=curr_clust, init='k-means++', random_state=42)
             kms = kms.fit(vector_norm)
             pred_labels = kms.labels_
@@ -70,15 +70,21 @@ class Clusterer:
             wcss[curr_clust] = kms.inertia_
             temp_labels[curr_clust] = pred_labels
             print(sil)
+            print(set(pred_labels))
+            break # TODO
         best_n = max(sils, key=lambda x: sils[x])
+        print(best_n)
         print(wcss)
-        kneedle = KneeLocator(list(wcss.keys()), list(wcss.values()), S=1.0, curve='convex', direction='decreasing')
-        try:
-            print(round(kneedle.knee, 3))
-            self.elbow = round(kneedle.knee, 3)
-        except TypeError:
+        if len(wcss) > 1:
+            kneedle = KneeLocator(list(wcss.keys()), list(wcss.values()), S=1.0, curve='convex', direction='decreasing')
+            try:
+                print(round(kneedle.knee, 3))
+                self.elbow = round(kneedle.knee, 3)
+            except TypeError:
+                self.elbow = best_n
+        else:
             self.elbow = best_n
-        if all_labels:
+        if self.config.multi_clustering:
             return temp_labels
         return temp_labels[best_n]
 

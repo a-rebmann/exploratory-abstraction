@@ -33,7 +33,7 @@ config = Config("input/", "output/", "Mobis.csv", dict(), "MPPNTaskAbstractionMo
 
 result, loaded = reader.load_result(config)
 
-clr = XES_NAME_DF_NUM
+clr = XES_NAME_DF
 #px.figure(figsize=(30, 30), dpi=300)
 fig = px.scatter(result.pca, x="x", y="y", color=clr, width=800, height=800)
 
@@ -43,5 +43,5 @@ st.plotly_chart(fig, use_container_width=True)
 
 container = st.container()
 for clust_num, clust_description in result.description.items():
-    container.write("## Description of event group " + str(clust_num))
+    container.write("### Description of event group " + str(clust_num))
     container.write(clust_description)

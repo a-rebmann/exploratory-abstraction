@@ -13,13 +13,23 @@ class PropertyComputer:
     def __init__(self, pd_events_fv, pd_log, config, clust):
         self.pd_events_fv = pd_events_fv
         self.pd_log = pd_log
-        self._clust_to_prop = None
+        self._clust_to_prop = dict()
         self.config = config
         self.clust = clust
 
-    def compute_props_for_clusters(self):
+    def compute_props_for_clusters(self, consider_multi_clusterings=False):
+        clustering_clust_to_props = dict()
+        if consider_multi_clusterings and self.config.multi_clustering:
+            for clustering_num in self.clust.pred_labels.keys():
+                clustering_clust_to_props[clustering_num] = self.compute_props_for_clustering(clustering_num)
+        else:
+            clustering_clust_to_props = {0: self.compute_props_for_clustering(str(self.clust.elbow) if self.config.multi_clustering else "")}
+        self._clust_to_prop = clustering_clust_to_props
+
+    def compute_props_for_clustering(self, col):
+        col_name = CLUST_COL + str(col) if self.config.multi_clustering else CLUST_COL
         clust_to_props = {}
-        col_name = CLUST_COL+str(self.clust.elbow) if self.config.multi_clustering else CLUST_COL
+        print(self.pd_events_fv[col_name].unique())
         for clust, events in self.pd_events_fv.groupby(col_name):
             event_types = []
             resources = []
@@ -59,7 +69,7 @@ class PropertyComputer:
 
             min_dur_per_case = min(all_group_durs)
             max_dur_per_case = max(all_group_durs)
-            #avg_dur_per_case = sum(all_group_durs, datetime.timedelta(0)) / len(all_group_durs)
+            # avg_dur_per_case = sum(all_group_durs, datetime.timedelta(0)) / len(all_group_durs)
 
             event_types_set = set(event_types)
             resources_set = set(resources)
@@ -73,7 +83,6 @@ class PropertyComputer:
             preceded_by_set = set(preceded_by)
             followed_by_set = set(followed_by)
             if self.config.noise_tau > 0:
-
                 # distribution of event types
                 self.remove_noise(event_types, event_types_set, XES_NAME, clust)
 
@@ -87,7 +96,7 @@ class PropertyComputer:
                                     preceded_by_set, followed_by_set, \
                                     min_dur_per_case, max_dur_per_case, 0, ev_per_case
 
-        self._clust_to_prop = clust_to_props
+        return clust_to_props
 
     def remove_noise(self, group_props, group_prop_set, att, clust):
         unique, counts = np.unique(group_props, return_counts=True)

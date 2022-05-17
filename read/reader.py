@@ -2,6 +2,8 @@ import os
 import pickle
 from const import *
 import pandas as pd
+from pm4py.objects.log.importer.xes import importer
+from pm4py.objects.conversion.log import converter
 
 
 def load_mppn_representations(config):
@@ -17,25 +19,28 @@ def load_mppn_representations(config):
 
 
 def read_csv_log(config):
-    pd_log = pd.read_csv(config.in_path + config.log_name, sep=",", engine="python")
+    pd_log = pd.read_csv(config.in_path + config.log_name, sep=";", engine="python")
     """check if given column names exist in log and rename them"""
     must_have = [config.att_names[XES_CASE], config.att_names[XES_NAME], config.att_names[XES_TIME]]
     not_exist_str = " does not exist as column name"
-
     for e in must_have:
         if e not in pd_log.columns:
             raise ValueError(e + not_exist_str)
-
     pd_log.rename(columns={config.att_names[XES_CASE]: XES_CASE,
                            config.att_names[XES_TIME]: XES_TIME,
                            config.att_names[XES_NAME]: XES_NAME},
                   inplace=True)
-
     if config.att_names[XES_RESOURCE] in pd_log.columns:
         pd_log.rename(columns={config.att_names[XES_RESOURCE]: XES_RESOURCE}, inplace=True)
     if config.att_names[XES_ROLE] in pd_log.columns:
         pd_log.rename(columns={config.att_names[XES_ROLE]: XES_ROLE}, inplace=True)
 
+    return pd_log
+
+
+def read_xes_log(config):
+    log = importer.apply(os.path.join(config.in_path, config.log_name))
+    pd_log = converter.apply(log, variant=converter.Variants.TO_DATA_FRAME)
     return pd_log
 
 
