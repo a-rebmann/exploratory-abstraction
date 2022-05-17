@@ -52,7 +52,7 @@ class TextGen:
             if len(event_types) == 1:
                 text = 'All events are of the ' + str(event_types).replace("{","").replace("}","") + ' type'
             else:
-                text += 'These are ' + str(event_types).replace("{","").replace("}","")
+                text += 'These are ' + str(event_types).replace("{","").replace("}","") + ". "
         self._description[clustering][clust] += text
 
     def generate_resources_text(self, clustering, clust, resources):
@@ -63,7 +63,7 @@ class TextGen:
             if len(resources) == 1:
                 text = 'All events are of executed by ' + str(resources).replace("{","").replace("}","")
             else:
-                text += 'These are ' + str(resources).replace("{","").replace("}","")
+                text += 'These are ' + str(resources).replace("{","").replace("}","") + ". "
         self._description[clustering][clust] += text
 
     def generate_roles_text(self, clustering, clust, roles):
@@ -74,7 +74,7 @@ class TextGen:
             if len(roles) == 1:
                 text = 'All events are of executed by the ' + str(roles).replace("{","").replace("}","") + ' role'
             else:
-                text += 'These are ' + str(roles).replace("{","").replace("}","")
+                text += 'These are ' + str(roles).replace("{","").replace("}","") + ". "
         self._description[clustering][clust] += text
 
 
@@ -112,5 +112,9 @@ class TextGen:
         return self._description
 
     def generate_event_stats_text(self, clustering, clust, events_per_case):
-        text = EVENTS_PER_CASE.format(addition="on average", num=int(sum(events_per_case)/len(events_per_case)))
+        num = int(sum(events_per_case) / len(events_per_case))
+        if num > 1:
+            text = EVENTS_PER_CASE.format(addition="on average", num=int(sum(events_per_case)/len(events_per_case)))
+        else:
+            text = "There is one event per case. "
         self._description[clustering][clust] += text
