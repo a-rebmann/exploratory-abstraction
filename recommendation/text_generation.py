@@ -50,7 +50,7 @@ class TextGen:
         text = COUNT_TEMPLATE.format(name="event types", count=len(event_types))
         if len(event_types) < 5:
             if len(event_types) == 1:
-                text = 'All events are of the ' + str(event_types).replace("{","").replace("}","") + ' type'
+                text = 'All events are of the ' + str(event_types).replace("{","").replace("}","") + ' type. '
             else:
                 text += 'These are ' + str(event_types).replace("{","").replace("}","") + ". "
         self._description[clustering][clust] += text
@@ -61,7 +61,7 @@ class TextGen:
             resources.remove('None')
         if len(resources) < 5:
             if len(resources) == 1:
-                text = 'All events are of executed by ' + str(resources).replace("{","").replace("}","")
+                text = 'All events are of executed by ' + str(resources).replace("{","").replace("}","") + '. '
             else:
                 text += 'These are ' + str(resources).replace("{","").replace("}","") + ". "
         self._description[clustering][clust] += text
@@ -72,7 +72,7 @@ class TextGen:
             roles.remove('None')
         if len(roles) < 3:
             if len(roles) == 1:
-                text = 'All events are of executed by the ' + str(roles).replace("{","").replace("}","") + ' role'
+                text = 'All events are of executed by the ' + str(roles).replace("{","").replace("}","") + ' role. '
             else:
                 text += 'These are ' + str(roles).replace("{","").replace("}","") + ". "
         self._description[clustering][clust] += text
