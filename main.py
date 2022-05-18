@@ -1,6 +1,7 @@
 import time
 import sys
 
+from abstraction.abstractor import Abstractor
 from recommendation.group_property_computation import PropertyComputer
 from recommendation.text_generation import TextGen
 from clustering import preprocessing
@@ -10,6 +11,7 @@ from config import Config
 from const import *
 from read import reader
 from write import writer
+from write.writer import export_log_as_xes
 
 config = Config("input/", "output/", "Mobis.csv",
                 {XES_CASE: "case", XES_NAME: "activity", XES_ROLE: "type", XES_RESOURCE: "user", XES_TIME: "start"},
@@ -34,9 +36,9 @@ def main():
 
         # Since k means is fast we can create multiple clusterings and use alternative options to present to the user
         if config.multi_clustering:
-            for clust_num, pred_labels in clust.pred_labels.items():
-                pd_events_fv[CLUST_COL+str(clust_num)] = pred_labels
-            print(pd_events_fv[CLUST_COL + str(clust_num)].unique())
+            for clustering_num, pred_labels in clust.pred_labels.items():
+                pd_events_fv[CLUST_COL+str(clustering_num)] = pred_labels
+            print(pd_events_fv[CLUST_COL + str(clustering_num)].unique())
         else:
             pd_events_fv[CLUST_COL] = clust.pred_labels
 
@@ -55,6 +57,11 @@ def main():
                 print(clust_num, clust_description)
 
         writer.write_result_to_disk(config, text_gen)
+        selected = [0,1,2,3,4,5,6,7,8,9,10,11,12] #TODO list that reflects which groups have been chosen
+        # apply groups to low-level log
+        abstractor = Abstractor(pd_events_fv, pd_log, config, selected, CLUST_COL + str(clustering_num))
+        abstracted_log = abstractor.apply_abstraction()
+        export_log_as_xes(abstracted_log, config)
         # Get similar events
         #pd_events_fv = compute_similarities(pd_events_fv)
         # Retrieve most similar events

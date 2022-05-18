@@ -6,7 +6,7 @@ Based on how they impact the abstraction result
 
 We want to have multiple events per case, otherwise there is no abstraction
 """
-
+from scipy.stats import wasserstein_distance
 
 class Ranker:
 
@@ -15,7 +15,6 @@ class Ranker:
         self.clust_to_props = clust_to_props
         self.pd_events_fv = pd_events_fv
         self.pd_log = pd_log
-
 
     def rank_by_uniqueness(self):
         pass

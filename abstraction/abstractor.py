@@ -179,10 +179,29 @@ class Abstractor:
         self.group_indicator_col = group_indicator_col
 
     def apply_abstraction(self):
+
+        # COpy the original log
         abstracted_log = self.pd_log.copy()
-        for group, events in self.pd_events_fv.groupby(self.group_indicator_col):
-            # in each case retain only the first and last event of each group
-            for case, in_case in events.groupby(XES_CASE):
-                pass
+        if XES_LIFECYCLE not in abstracted_log.columns:
+            abstracted_log[XES_LIFECYCLE] = 'complete'
+        abstracted_log[XES_NAME+'_old'] = abstracted_log[XES_NAME]
+        abstracted_log[self.group_indicator_col] = self.pd_events_fv[self.group_indicator_col]
+        abstracted_log[XES_NAME] = abstracted_log[self.group_indicator_col]
+        # create a column that contains new activity labels for the final log
+        abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection), XES_NAME] = \
+        abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection)][XES_NAME]
+
+        # create a column that contains new activity labels for the group by
+        abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection), self.group_indicator_col] = \
+        abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection)][XES_NAME] + \
+        abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection)][XES_TIME]
+        abstracted_log.to_csv(self.config.out_path + self.config.log_name + "_d.csv")
+
+        g = abstracted_log.groupby([XES_CASE, self.group_indicator_col])
+        abstracted_log.loc[g[XES_LIFECYCLE].head(1).index, XES_LIFECYCLE] = 'start'
+        abstracted_log.loc[g[XES_LIFECYCLE].tail(1).index, XES_LIFECYCLE] = 'complete'
+        # in each case retain only the first and last event of each group
+        abstracted_log = (pd.concat([g.head(1), g.tail(1)]).drop_duplicates().sort_values(XES_TIME).reset_index(drop=True))
+        return abstracted_log
 
 
