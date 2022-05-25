@@ -1,4 +1,5 @@
 from datetime import timedelta
+from const import *
 
 COUNT_TEMPLATE = "The group of events has {count} {name}. "
 
@@ -13,38 +14,32 @@ EVENTS_PER_CASE = "There are {num} events per case {addition}. "
 
 class TextGen:
 
-    def __init__(self, pd_events_fv, pca, clust_to_prop, config):
-        self.pd_events_fv = pd_events_fv
+    def __init__(self, log, clust_to_prop, config):
+        self.log = log
         self.clus_to_prop = clust_to_prop
         self._description = {}
-        self.pca = pca
         self.config = config
 
     def generate_descriptions_for_clusters(self):
         for clustering in self.clus_to_prop.keys():
             self._description[clustering] = {}
-            for clust, (
-                    event_types, resources, roles, cat_atts, num_atts, preceded_by, followed_by, min_dur_per_case,
-                    max_dur_per_case,
-                    avg_dur_per_case, events_per_case) in self.clus_to_prop[clustering].items():
-                self.generate_description_for_cluster(clustering, clust, event_types, resources, roles, cat_atts, num_atts, preceded_by,
-                                                      followed_by, min_dur_per_case, max_dur_per_case, avg_dur_per_case, events_per_case)
+            for clust, (categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case) in self.clus_to_prop[clustering].items():
+                self.generate_description_for_cluster(clustering, clust, categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case)
                 #print(clust, event_types)
 
-    def generate_description_for_cluster(self, clustering, clust, event_types, resources, roles, cat_atts, num_atts, preceded_by,
-                                         followed_by, min_dur_per_case, max_dur_per_case, avg_dur_per_case, events_per_case):
+    def generate_description_for_cluster(self, clustering, clust, categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case):
         self._description[clustering][clust] = ""
         # TODO decide on which text to include in the description
 
-        self.generate_event_types_text(clustering, clust, event_types)
-        self.generate_event_stats_text(clustering, clust, events_per_case)
-        self.generate_resources_text(clustering, clust, resources)
-        self.generate_roles_text(clustering, clust, roles)
-        self.generate_cat_atts_text(clustering, clust, cat_atts)
-        self.generate_num_atts_text(clustering, clust, num_atts)
-        self.generate_preceeding_text(clustering, clust, preceded_by)
-        self.generate_followed_by_text(clustering, clust, followed_by)
-        self.generate_duration_text(clustering, clust, min_dur_per_case, max_dur_per_case, avg_dur_per_case)
+        self.generate_event_types_text(clustering, clust, categorical_set[XES_NAME])
+        self.generate_event_stats_text(clustering, clust, categorical_per_case[XES_NAME])
+        self.generate_resources_text(clustering, clust, categorical_set[XES_RESOURCE])
+        self.generate_roles_text(clustering, clust, categorical_set[self.config.att_names[XES_ROLE]])
+        self.generate_cat_atts_text(clustering, clust, categorical_set)
+        self.generate_num_atts_text(clustering, clust, numerical)
+        self.generate_preceeding_text(clustering, clust, categorical_per_case[PREDECESSORS])
+        self.generate_followed_by_text(clustering, clust, categorical_per_case[SUCCESSORS])
+        self.generate_duration_text(clustering, clust, time_per_case)
 
     def generate_event_types_text(self, clustering, clust, event_types):
         text = COUNT_TEMPLATE.format(name="event types", count=len(event_types))
@@ -90,8 +85,10 @@ class TextGen:
     def generate_followed_by_text(self, clustering, clust, followed_by):
         pass
 
-    def generate_duration_text(self, clustering, clust, min_dur_per_case, max_dur_per_case, avg_dur_per_case):
-        if max_dur_per_case == timedelta(seconds=0):
+    def generate_duration_text(self, clustering, clust, time_per_case):
+        max_dur = max(time_per_case[DURATION])
+        min_dur = min(time_per_case[DURATION])
+        if max(time_per_case[DURATION]) == timedelta(seconds=0):
             return
         # min_dur_per_case = (str(min_dur_per_case.days) + " days " if min_dur_per_case.days > 0 else "") + \
         #                    (str(min_dur_per_case.hours) + " hours " if min_dur_per_case.seconds//3600 > 0 else "") + \
@@ -99,10 +96,10 @@ class TextGen:
         #                    (str(min_dur_per_case.seconds) + " seconds"if min_dur_per_case.seconds > 0 else "")
         # max_dur_per_case = str(max_dur_per_case.days) + " days " + str(max_dur_per_case.hours) + " hours " + str(
         #     max_dur_per_case.minutes) + " minutes " + str(max_dur_per_case.seconds) + " seconds"
-        if min_dur_per_case == timedelta(seconds=0):
-            min_dur_per_case = "O seconds"
+        if min(time_per_case[DURATION]) == timedelta(seconds=0):
+            min_dur = "O seconds"
 
-        text = DURATION_TEMPLATE_RANGE.format(dur="duration", min_value=min_dur_per_case, max_value=max_dur_per_case)
+        text = DURATION_TEMPLATE_RANGE.format(dur="duration", min_value=min_dur, max_value=max_dur)
         self._description[clustering][clust] += text
         # text = DURATION_TEMPLATE.format(dur="average duration", value=avg_dur_per_case) #TODO average
         # self._description[clustering][clust] += text

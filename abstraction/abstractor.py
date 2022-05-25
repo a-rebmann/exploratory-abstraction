@@ -171,9 +171,8 @@ class Abstractor:
     applies the selected groups to the input event log to create an abstracted event log
     """
 
-    def __init__(self, pd_events_fv, pd_log, config, selection, group_indicator_col):
-        self.pd_events_fv = pd_events_fv
-        self.pd_log = pd_log
+    def __init__(self, log, config, selection, group_indicator_col):
+        self.log = log
         self.config = config
         self.selection = selection
         self.group_indicator_col = group_indicator_col
@@ -181,11 +180,11 @@ class Abstractor:
     def apply_abstraction(self):
 
         # COpy the original log
-        abstracted_log = self.pd_log.copy()
+        abstracted_log = self.log.pd_log.copy()
         if XES_LIFECYCLE not in abstracted_log.columns:
             abstracted_log[XES_LIFECYCLE] = 'complete'
         abstracted_log[XES_NAME+'_old'] = abstracted_log[XES_NAME]
-        abstracted_log[self.group_indicator_col] = self.pd_events_fv[self.group_indicator_col]
+        abstracted_log[self.group_indicator_col] = self.log.pd_fv[self.group_indicator_col]
         abstracted_log[XES_NAME] = abstracted_log[self.group_indicator_col]
         # create a column that contains new activity labels for the final log
         abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection), XES_NAME] = \

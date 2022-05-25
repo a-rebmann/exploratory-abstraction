@@ -19,7 +19,11 @@ def load_mppn_representations(config):
 
 
 def read_csv_log(config):
-    pd_log = pd.read_csv(config.in_path + config.log_name, sep=";", engine="python")
+    if "Mobis" in config.log_name:
+        decimal = ','
+        pd_log = pd.read_csv(config.in_path + config.log_name, sep=";", engine="python", decimal=decimal)
+    else:
+        pd_log = pd.read_csv(config.in_path + config.log_name, sep=";", engine="python")
     """check if given column names exist in log and rename them"""
     must_have = [config.att_names[XES_CASE], config.att_names[XES_NAME], config.att_names[XES_TIME]]
     not_exist_str = " does not exist as column name"
@@ -31,12 +35,18 @@ def read_csv_log(config):
                            config.att_names[XES_NAME]: XES_NAME},
                   inplace=True)
     if config.att_names[XES_RESOURCE] in pd_log.columns:
+        pd_log[config.att_names[XES_RESOURCE]] = pd_log[config.att_names[XES_RESOURCE]].fillna("None").astype(str)
         pd_log.rename(columns={config.att_names[XES_RESOURCE]: XES_RESOURCE}, inplace=True)
-        pd_log[XES_RESOURCE] = pd_log[XES_RESOURCE].fillna("None").astype(str)
         #print(pd_log[XES_RESOURCE].unique())
+        pass
     if config.att_names[XES_ROLE] in pd_log.columns:
-        pd_log.rename(columns={config.att_names[XES_ROLE]: XES_ROLE}, inplace=True)
-        pd_log[XES_ROLE] = pd_log[XES_ROLE].fillna("None").astype(str)
+        #pd_log.rename(columns={config.att_names[XES_ROLE]: XES_ROLE}, inplace=True)
+        pd_log[config.att_names[XES_ROLE]] = pd_log[config.att_names[XES_ROLE]].fillna("None").astype(str)
+        pass
+    if "case:travel_start" in pd_log.columns:
+        pd_log.rename(columns={"case:travel_start": "travel_start"}, inplace=True)
+    if "case:travel_end" in pd_log.columns:
+        pd_log.rename(columns={"case:travel_end": "travel_end"}, inplace=True)
 
     return pd_log
 

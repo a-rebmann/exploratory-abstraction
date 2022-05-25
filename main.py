@@ -2,10 +2,12 @@ import time
 import sys
 
 from abstraction.abstractor import Abstractor
+from model.log import Log
 from recommendation.group_property_computation import PropertyComputer
 from recommendation.text_generation import TextGen
 from clustering import preprocessing
 from clustering.clusterer import Clusterer
+from recommendation.ranking import Ranker
 from clustering.retrieve import compute_similarities, retrieve_most_similar_events
 from config import Config
 from const import *
@@ -21,11 +23,13 @@ config = Config("input/", "output/", "Mobis.csv",
 def main():
     # first read the raw log
     pd_log = reader.read_csv_log(config)
+
     # then read the representations leaned
     pd_events_fv, loaded = reader.load_mppn_representations(config)
     if loaded:
+        log = Log(pd_log, pd_events_fv)
         # Do PCA
-        pca_df, pca_rep = preprocessing.pca(pd_events_fv)
+        pca_df, pca_rep = preprocessing.pca(log.pd_fv)
         #preprocessing.viz(pca)
 
         # Cluster
@@ -44,12 +48,15 @@ def main():
 
 
         # Compute key properties
-        props = PropertyComputer(pd_events_fv, pd_log, config, clust)
+        props = PropertyComputer(log, config, clust)
         props.compute_props_for_clusters()
+
+        ranker = Ranker(log, config, props.clust_to_prop)
+        ranker.create_ranking()
         #print(len(props.clust_to_prop))
         #print(props.clust_to_prop)
         # Generate cluster descriptions
-        text_gen = TextGen(pd_events_fv, pca_df, props.clust_to_prop, config)
+        text_gen = TextGen(log, props.clust_to_prop, config)
         text_gen.generate_descriptions_for_clusters()
         #print(text_gen.description)
         for clustering in text_gen.description.keys():
@@ -59,7 +66,7 @@ def main():
         writer.write_result_to_disk(config, text_gen)
         selected = [0,1,2,3,4,5,6,7,8,9,10,11,12] #TODO list that reflects which groups have been chosen
         # apply groups to low-level log
-        abstractor = Abstractor(pd_events_fv, pd_log, config, selected, CLUST_COL + str(clustering_num))
+        abstractor = Abstractor(log, config, selected, CLUST_COL + str(clustering_num))
         abstracted_log = abstractor.apply_abstraction()
         export_log_as_xes(abstracted_log, config)
         # Get similar events
