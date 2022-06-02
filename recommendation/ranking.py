@@ -26,45 +26,55 @@ class Ranker:
 
 
     def rank_by_uniqueness(self):
+        unique = {}
         for clustering in self.clust_to_props.keys():
             cat_lens = dict()
             num_ranges = dict()
             for clust, (categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case) in self.clust_to_props[clustering].items():
+                print(clust, categorical_set, numerical_per_case)
                 for att, item_set in categorical_set.items():
                     if att == XES_NAME and len(item_set) == 1:
                         continue
                     cat_lens[str(clust)+"#"+att] = len(item_set)
                 for att, item_set in numerical_per_case.items():
-                    num_ranges[str(clust)+"#"+att] = mean(item_set)
+                    if len(item_set)>1:
+                        num_ranges[str(clust)+"#"+att] = mean(item_set)
+                    elif len(item_set) == 1:
+                        num_ranges[str(clust) + "#" + att] = next(iter(item_set))
             cat_lens = dict(sorted(cat_lens.items(), key=lambda item: item[1]))
             num_ranges = dict(sorted(num_ranges.items(), key=lambda item: item[1]))
             print(cat_lens)
             print(num_ranges)
-            return
+            unique[clustering] = (cat_lens, num_ranges)
+        return unique
 
     def rank_by_distinctness(self):
+        distinct = {}
         for clustering in self.clust_to_props.keys():
             cat_emd = dict()
             num_ranges = dict()
             for clust1, (categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case) in self.clust_to_props[clustering].items():
 
                 for att in categorical_set.keys():
+                    print(att)
                     emd_sum = 0
                     for clust2, (categorical2, categorical_set2, numerical2, time2, categorical_per_case2, numerical_per_case2, time_per_case2) in self.clust_to_props[clustering].items():
-
-                        ev_type_emd = wasserstein_distance(self.log.encoders[att].transform(list(categorical_set[att])),
-                                                           self.log.encoders[att].transform(list(categorical_set2[att])))
-                        emd_sum += ev_type_emd
+                        if len(categorical_set[att])>0 and len(categorical_set2[att])>0:
+                            ev_type_emd = wasserstein_distance(self.log.encoders[att].transform(list(categorical_set[att])),
+                                                               self.log.encoders[att].transform(list(categorical_set2[att])))
+                            emd_sum += ev_type_emd
 
                     cat_emd[str(clust1)+"#"+att] = emd_sum
                 for att in numerical_per_case.keys():
                     emd_sum = 0
                     for clust2, (categorical2, categorical_set2, numerical2, time2, categorical_per_case2, numerical_per_case2, time_per_case2) in self.clust_to_props[clustering].items():
+                        if len(numerical_per_case[att]) > 0 and len(numerical_per_case2[att]) > 0:
+                            ev_type_emd = wasserstein_distance(numerical_per_case[att], numerical_per_case2[att])
+                            emd_sum += ev_type_emd
 
-                        ev_type_emd = wasserstein_distance(numerical_per_case[att], numerical_per_case[att])
-                        emd_sum += ev_type_emd
-
-                    cat_emd[str(clust1)+"#"+att] = emd_sum
+                    num_ranges[str(clust1)+"#"+att] = emd_sum
+            distinct[clustering] = (cat_emd, num_ranges)
+        return distinct
 
     def rank_by_abstraction_impact(self):
         pass

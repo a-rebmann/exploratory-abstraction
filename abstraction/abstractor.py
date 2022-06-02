@@ -192,8 +192,8 @@ class Abstractor:
 
         # create a column that contains new activity labels for the group by
         abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection), self.group_indicator_col] = \
-        abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection)][XES_NAME] + \
-        abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection)][XES_TIME]
+            abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection)][XES_NAME].astype(str) + \
+        abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection)][XES_TIME].astype(str)
         abstracted_log.to_csv(self.config.out_path + self.config.log_name + "_d.csv")
 
         g = abstracted_log.groupby([XES_CASE, self.group_indicator_col])

@@ -23,18 +23,25 @@ class TextGen:
     def generate_descriptions_for_clusters(self):
         for clustering in self.clus_to_prop.keys():
             self._description[clustering] = {}
-            for clust, (categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case) in self.clus_to_prop[clustering].items():
-                self.generate_description_for_cluster(clustering, clust, categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case)
-                #print(clust, event_types)
+            for clust, (
+            categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case) in \
+            self.clus_to_prop[clustering].items():
+                self.generate_description_for_cluster(clustering, clust, categorical, categorical_set, numerical, time,
+                                                      categorical_per_case, numerical_per_case, time_per_case)
+                # print(clust, event_types)
 
-    def generate_description_for_cluster(self, clustering, clust, categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case):
+    def generate_description_for_cluster(self, clustering, clust, categorical, categorical_set, numerical, time,
+                                         categorical_per_case, numerical_per_case, time_per_case):
         self._description[clustering][clust] = ""
         # TODO decide on which text to include in the description
 
         self.generate_event_types_text(clustering, clust, categorical_set[XES_NAME])
         self.generate_event_stats_text(clustering, clust, categorical_per_case[XES_NAME])
-        self.generate_resources_text(clustering, clust, categorical_set[XES_RESOURCE])
-        self.generate_roles_text(clustering, clust, categorical_set[self.config.att_names[XES_ROLE]])
+        if XES_RESOURCE in self.log.categorical_atts:
+            self.generate_resources_text(clustering, clust, categorical_set[XES_RESOURCE])
+
+        if XES_ROLE in self.log.categorical_atts:
+            self.generate_roles_text(clustering, clust, categorical_set[self.config.att_names[XES_ROLE]])
         self.generate_cat_atts_text(clustering, clust, categorical_set)
         self.generate_num_atts_text(clustering, clust, numerical)
         self.generate_preceeding_text(clustering, clust, categorical_per_case[PREDECESSORS])
@@ -45,9 +52,9 @@ class TextGen:
         text = COUNT_TEMPLATE.format(name="event types", count=len(event_types))
         if len(event_types) < 5:
             if len(event_types) == 1:
-                text = 'All events are of the ' + str(event_types).replace("{","").replace("}","") + ' type. '
+                text = 'All events are of the ' + str(event_types).replace("{", "").replace("}", "") + ' type. '
             else:
-                text += 'These are ' + str(event_types).replace("{","").replace("}","") + ". "
+                text += 'These are ' + str(event_types).replace("{", "").replace("}", "") + ". "
         self._description[clustering][clust] += text
 
     def generate_resources_text(self, clustering, clust, resources):
@@ -56,9 +63,9 @@ class TextGen:
             resources.remove('None')
         if len(resources) < 5:
             if len(resources) == 1:
-                text = 'All events are of executed by ' + str(resources).replace("{","").replace("}","") + '. '
+                text = 'All events are executed by ' + str(resources).replace("{", "").replace("}", "") + '. '
             else:
-                text += 'These are ' + str(resources).replace("{","").replace("}","") + ". "
+                text += 'These are ' + str(resources).replace("{", "").replace("}", "") + ". "
         self._description[clustering][clust] += text
 
     def generate_roles_text(self, clustering, clust, roles):
@@ -67,23 +74,92 @@ class TextGen:
             roles.remove('None')
         if len(roles) < 3:
             if len(roles) == 1:
-                text = 'All events are of executed by the ' + str(roles).replace("{","").replace("}","") + ' role. '
+                text = 'All events are executed by the ' + str(roles).replace("{", "").replace("}", "") + ' role. '
             else:
-                text += 'These are ' + str(roles).replace("{","").replace("}","") + ". "
+                text += 'These are ' + str(roles).replace("{", "").replace("}", "") + ". "
         self._description[clustering][clust] += text
 
-
     def generate_cat_atts_text(self, clustering, clust, cat_atts):
-        pass
+        text = ""
+        for att, items in cat_atts.items():
+            if len(items) == 0:
+                continue
+            if att in [XES_NAME, XES_RESOURCE, XES_ROLE]:
+                continue
+            # TODO add generic text
+            text += "There are the following values for " + att + " in this group: " + str(items).replace("{",
+                                                                                                          "").replace(
+                "}", "") + ". "
+        self._description[clustering][clust] += text
 
     def generate_num_atts_text(self, clustering, clust, num_atts):
-        pass
+        text = ""
+        for att, items in num_atts.items():
+            if len(items) == 0:
+                continue
+            # TODO add generic text
+            text += att + " has the following value range in this group: " + str(min(items)).replace("{",
+                                                                                               "").replace(
+                "}", "") + " - " + str(max(items)).replace("{",
+                                                                                               "").replace(
+                "}", "") + ". "
+        self._description[clustering][clust] += text
+
+    def generate_resources_text_per_case(self, clustering, clust, resources):
+        if 'None' in resources:
+            resources.remove('None')
+        if all(x == 1 for x in resources):
+            text = 'Per case, all events are executed by the same resource. '
+        else:
+            rounded_avg = int(sum(resources) / len(resources))
+            text = 'Per case, all events are executed by ' + str(rounded_avg) + ' different resources on average. '
+        self._description[clustering][clust] += text
+
+    def generate_roles_text_per_case(self, clustering, clust, roles):
+        if 'None' in roles:
+            roles.remove('None')
+        if all(x == 1 for x in roles):
+            text = 'Per case, all events are executed by the same role. '
+        else:
+            rounded_avg = int(sum(roles) / len(roles))
+            text = 'Per case, all events are executed by ' + str(rounded_avg) + ' different roles on average. '
+        self._description[clustering][clust] += text
+
+    def generate_cat_atts_text_per_case(self, clustering, clust, cat_atts):
+        text = ""
+        for att, items in cat_atts.items():
+            if len(items) == 0:
+                continue
+            if att in [XES_NAME, XES_RESOURCE, XES_ROLE]:
+                continue
+            # TODO add generic text
+            text += "There are " + str(len(items)) + " values for " + att + " in this group. "
+        self._description[clustering][clust] += text
+
+    def generate_num_atts_text_per_case(self, clustering, clust, num_atts):
+        text = ""
+        for att, items in num_atts.items():
+            if len(items) == 0:
+                continue
+            rounded_avg = int(sum(items) / len(items))
+            text = 'Per case, events have an average value range of' + "{:.2f}".format(rounded_avg) + ". "
+        self._description[clustering][clust] += text
 
     def generate_preceeding_text(self, clustering, clust, preceded_by):
-        pass
+        text = ""
+        if len(preceded_by) == 1:
+            text += "The group is always preceded by " + str(preceded_by).replace("{",
+                                                                                                          "").replace(
+                "}", "") + ". "
+        self._description[clustering][clust] += text
 
     def generate_followed_by_text(self, clustering, clust, followed_by):
-        pass
+        text = ""
+        if len(followed_by) == 1:
+            text += "The group is always followed by " + str(followed_by).replace("{",
+                                                                                  "").replace(
+                "}", "") + ". "
+        self._description[clustering][clust] += text
 
     def generate_duration_text(self, clustering, clust, time_per_case):
         max_dur = max(time_per_case[DURATION])
@@ -111,7 +187,7 @@ class TextGen:
     def generate_event_stats_text(self, clustering, clust, events_per_case):
         num = int(sum(events_per_case) / len(events_per_case))
         if num > 1:
-            text = EVENTS_PER_CASE.format(addition="on average", num=int(sum(events_per_case)/len(events_per_case)))
+            text = EVENTS_PER_CASE.format(addition="on average", num=int(sum(events_per_case) / len(events_per_case)))
         else:
             text = "There is one event per case. "
         self._description[clustering][clust] += text

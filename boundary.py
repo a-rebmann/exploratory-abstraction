@@ -1,34 +1,13 @@
 import streamlit as st
-import plotly.figure_factory as ff
-import numpy as np
 
-# Add histogram data
-# x1 = np.random.randn(200) - 2
-# x2 = np.random.randn(200)
-# x3 = np.random.randn(200) + 2
-#
-# # Group data together
-# hist_data = [x1, x2, x3]
-#
-# group_labels = ['Group 1', 'Group 2', 'Group 3']
-#
-# # Create distplot with custom bin_size
-# fig = ff.create_distplot(
-#          hist_data, group_labels, bin_size=[.1, .25, .5])
-#
-# # Plot!
-# st.plotly_chart(fig, use_container_width=True)
-
-import pandas as pd
 from const import *
-from clustering.retrieve import compute_similarities, retrieve_most_similar_events
+
 from read import reader
-from clustering import preprocessing
-from clustering.clusterer import Clusterer
 from config import Config
+from main import BPI17_NAME, BPI17_REP
 import plotly.express as px
 # the config object
-config = Config("input/", "output/", "Mobis.csv", dict(), "MPPNTaskAbstractionMobIS_pd_cases_fv_fine_1", clust="k_means")
+config = Config("input/", "output/", BPI17_NAME, dict(), BPI17_REP, clust="k_means")
 
 st.set_page_config(layout="wide")
 

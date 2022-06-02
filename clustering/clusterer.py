@@ -15,6 +15,7 @@ import numpy as np
 
 from write.writer import write_linkage_matrix
 
+
 class Clusterer:
 
     def __init__(self, pd_events_fv, config):
@@ -25,6 +26,7 @@ class Clusterer:
         self.elbow = None
 
     def cluster(self, vectors, n_clusters=50):
+        print("Start clustering " + str(len(vectors)) + " data points")
         """
         Clusters the given feature vectors
 
@@ -44,7 +46,6 @@ class Clusterer:
         elif self.config.clust == 'dbscan':
             self._pred_labels = self.dbscan(vectors, n_clusters)
 
-
     def evaluate(self):
         """
         Computes the distribution of the computed clusters.
@@ -61,8 +62,8 @@ class Clusterer:
         sils = dict()
         wcss = dict()
         temp_labels = dict()
-        for curr_clust in range(int(len(self.pd_events_fv[XES_NAME_DF].unique())*.5), int(n_clusters*1.5), 3):
-            kms = KMeans(n_clusters=curr_clust, init='k-means++', random_state=42)
+        for curr_clust in range(int(len(self.pd_events_fv[XES_NAME_DF].unique()) * .5), int(n_clusters * 1.5), 3):
+            kms = KMeans(n_clusters=curr_clust, init='k-means++', random_state=42, algorithm="elkan")
             kms = kms.fit(vector_norm)
             pred_labels = kms.labels_
             sil = silhouette_score(vectors, pred_labels)
@@ -71,7 +72,7 @@ class Clusterer:
             temp_labels[curr_clust] = pred_labels
             print(sil)
             print(set(pred_labels))
-            break # TODO
+            # break  # TODO
         best_n = max(sils, key=lambda x: sils[x])
         print(best_n)
         print(wcss)
@@ -110,7 +111,6 @@ class Clusterer:
     def affinity(self, vectors):
         clustering = AffinityPropagation(random_state=5).fit(vectors)
         return clustering.labels_
-
 
     @property
     def pred_labels(self):

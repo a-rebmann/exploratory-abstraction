@@ -10,6 +10,9 @@ XES_CASE = "case:" + XES_NAME
 
 MOBIS_ROLE = "type"
 
+PCA_S = "PCA"
+TSNE_S = "TSNE"
+
 
 FV = "fv"
 SIMILAR_EVENTS = "most_similar_events"

@@ -59,7 +59,7 @@ def read_xes_log(config):
 
 def load_result(config):
     try:
-        with open(os.path.join(config.out_path, config.log_name + '_result.pkl'), 'rb') as f:
+        with open(os.path.join(config.out_path, str(config) + '_result.pkl'), 'rb') as f:
             pickled_res = pickle.load(f)
             return pickled_res, True
     except FileNotFoundError:

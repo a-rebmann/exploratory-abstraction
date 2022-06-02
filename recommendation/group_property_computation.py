@@ -28,6 +28,9 @@ class PropertyComputer:
         for clust, events in self.log.pd_fv.groupby(col_name):
             numerical = {att: [] for att in self.log.numerical_atts}
             categorical = {att: [] for att in self.log.categorical_atts}
+            categorical[PREDECESSORS] = []
+            categorical[SUCCESSORS] = []
+
             time = {DAY_OF_WEEK: []}
 
             categorical_set = {att: set() for att in self.log.categorical_atts}
@@ -35,27 +38,41 @@ class PropertyComputer:
 
             numerical_per_case = {att: [] for att in self.log.numerical_atts}
             categorical_per_case = {att: [] for att in self.log.categorical_atts}
-            categorical_per_case[PREDECESSORS] = []
-            categorical_per_case[SUCCESSORS] = []
-            time_per_case = {DURATION: []}
 
+            time_per_case = {DURATION: []}
+            idx = 0
             for case, events_per_case in events.groupby(XES_CASE):
                 # print(case)
                 if len(events_per_case) < 1:
                     continue
 
                 indices = events_per_case[EVENT_POS_IN_CASE].tolist()
-                case_full = events_per_case.iloc[0][TRACE_DF].iloc[indices]
+                try:
+                    case_full = events_per_case.iloc[0][TRACE_DF].iloc[indices]
+                except IndexError:
+                    print(indices, events_per_case.iloc[0][TRACE_DF])
+                    continue
                 case_full_all = events_per_case.iloc[0][TRACE_DF]
 
                 for att in self.log.categorical_atts:
-                    categorical[att].extend(case_full[att].tolist())
+                    if att in case_full.columns:
+                        if len(self.log.pd_log[att].dropna().unique()) == len(self.log.pd_log[att].dropna()):
+                            print(att, "IDs are only considered per case")
+                            continue
+                        categorical[att].extend(case_full[att].dropna().tolist())
                 for att in self.log.numerical_atts:
-                    numerical[att].extend(case_full[att].tolist())
+                    if att in case_full.columns:
+                        numerical[att].extend(case_full[att].dropna().tolist())
                 for att in self.log.categorical_atts:
-                    categorical_per_case[att].append(len(case_full[att]))
+                    if att in case_full.columns:
+                        categorical_per_case[att].append(len(case_full[att].dropna()))
                 for att in self.log.numerical_atts:
-                    numerical_per_case[att].append(case_full[att].max() - case_full[att].min())
+                    if att in case_full.columns:
+                        try:
+                            numerical_per_case[att].append(case_full[att].astype(float).dropna().max() - case_full[att].astype(float).dropna().min())
+                        except TypeError:
+                            idx += 1
+                            print(att, case_full[att].dropna().unique())
 
                 time[DAY_OF_WEEK].extend(case_full[XES_TIME].apply(lambda x: x.weekday()).tolist())
 
@@ -67,14 +84,14 @@ class PropertyComputer:
                 max_idx = max(indices)
                 # check which types of events can happen before or after a group in a case
                 if min_idx > 0:
-                    categorical_per_case[PREDECESSORS].append(case_full_all.iloc[min_idx - 1][XES_NAME])
+                    categorical[PREDECESSORS].append(case_full_all.iloc[min_idx - 1][XES_NAME])
                 if max_idx < len(case_full_all) - 1:
-                    categorical_per_case[SUCCESSORS].append(case_full_all.iloc[max_idx + 1][XES_NAME])
+                    categorical[SUCCESSORS].append(case_full_all.iloc[max_idx + 1][XES_NAME])
 
-            if self.config.noise_tau > 0:
-                for att in categorical.keys():
-                    categorical_set[att] = set(categorical[att])
-                    # distribution of event types
+            # print(idx, "cases ar affected in clust", clust)
+            for att in categorical.keys():
+                categorical_set[att] = set(categorical[att])
+                if self.config.noise_tau > 0:
                     self.remove_noise(categorical, categorical_set, att)
 
             clust_to_props[clust] = categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case
@@ -82,19 +99,19 @@ class PropertyComputer:
         return clust_to_props
 
     def remove_noise(self, group_props, group_prop_set, att):
-        print(att)
+        #print(att)
         unique, counts = np.unique(group_props[att], return_counts=True)
         distribution_group = dict(zip(unique, counts))
 
-        unique, counts = np.unique(self.log.pd_log[att], return_counts=True)
+        unique, counts = np.unique(self.log.pd_log[att].dropna(), return_counts=True)
         distribution_log = dict(zip(unique, counts))
+        if len(distribution_log.values()) > 0 and len(distribution_group.values()) > 0:
+            max_num_group = max(distribution_group.values())
+            max_num_log = max(distribution_log.values())
 
-        max_num_group = max(distribution_group.values())
-        max_num_log = max(distribution_log.values())
-
-        for et, cnt in distribution_group.items():
-            if (cnt / distribution_log[et]) < (self.config.noise_tau * (max_num_group / max_num_log)):
-                group_prop_set[att].remove(et)
+            for et, cnt in distribution_group.items():
+                if (cnt / distribution_log[et]) < (self.config.noise_tau * (max_num_group / max_num_log)):
+                    group_prop_set[att].remove(et)
 
     @property
     def clust_to_prop(self):
