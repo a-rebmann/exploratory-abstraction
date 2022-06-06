@@ -27,7 +27,7 @@ def export_log_as_xes(pd_log, config):
     #pd_log = dataframe_utils.convert_timestamp_columns_in_df(pd_log)
     pd_log = pd_log.sort_values(XES_TIME)
     event_log = log_converter.apply(pd_log)
-    xes_exporter.apply(event_log, str(config)+'_abstracted.xes')
+    xes_exporter.apply(event_log, config.out_path + "/" + str(config)+'_abstracted.xes')
 
 
 def serialize_clustering(clust, config):

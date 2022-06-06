@@ -24,11 +24,15 @@ COL_INDEX_TRACE = 3
 COL_INDEX_POS = 8
 CLUST_COL = "clust"
 
+PART_OF_CASE = "part_of_case"
 DAY_OF_WEEK = "time:dayofweek"
 DURATION = "time:duration"
 PREDECESSORS = "predecessors"
 SUCCESSORS = "successors"
 
+
+START_TOK = '▶'
+END_TOK = '■'
 
 DATE_PATTERNS = [re.compile('([0-9]{4})[\\.\\/\\-]([0-9]{1,2})[\\.\\/\\-]([0-9]{1,2})'),
                  re.compile(

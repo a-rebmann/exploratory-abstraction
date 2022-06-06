@@ -54,6 +54,7 @@ def read_csv_log(config):
 def read_xes_log(config):
     log = importer.apply(os.path.join(config.in_path, config.log_name))
     pd_log = converter.apply(log, variant=converter.Variants.TO_DATA_FRAME)
+    pd_log = pd_log.groupby(XES_CASE).head(65)
     return pd_log
 
 

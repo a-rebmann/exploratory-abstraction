@@ -1,4 +1,4 @@
-import datetime
+import math
 
 from const import *
 import numpy as np
@@ -6,7 +6,7 @@ import numpy as np
 
 class PropertyComputer:
 
-    def __init__(self,log, config, clust):
+    def __init__(self, log, config, clust):
         self.log = log
         self._clust_to_prop = dict()
         self.config = config
@@ -30,10 +30,16 @@ class PropertyComputer:
             categorical = {att: [] for att in self.log.categorical_atts}
             categorical[PREDECESSORS] = []
             categorical[SUCCESSORS] = []
+            categorical[PART_OF_CASE] = []
+            numerical[EVENT_POS_IN_CASE] = []
 
             time = {DAY_OF_WEEK: []}
 
             categorical_set = {att: set() for att in self.log.categorical_atts}
+            categorical_set[PREDECESSORS] = set()
+            categorical_set[SUCCESSORS] = set()
+            categorical_set[PART_OF_CASE] = []
+
             time_set = {DAY_OF_WEEK: set()}
 
             numerical_per_case = {att: [] for att in self.log.numerical_atts}
@@ -50,16 +56,14 @@ class PropertyComputer:
                 try:
                     case_full = events_per_case.iloc[0][TRACE_DF].iloc[indices]
                 except IndexError:
-                    print(indices, events_per_case.iloc[0][TRACE_DF])
+                    print(clust, indices, len(events_per_case.iloc[0][TRACE_DF]))
                     continue
                 case_full_all = events_per_case.iloc[0][TRACE_DF]
 
                 for att in self.log.categorical_atts:
                     if att in case_full.columns:
-                        if len(self.log.pd_log[att].dropna().unique()) == len(self.log.pd_log[att].dropna()):
-                            print(att, "IDs are only considered per case")
-                            continue
-                        categorical[att].extend(case_full[att].dropna().tolist())
+                        if "ID" not in att and not att[-2:] == "id":
+                            categorical[att].extend(case_full[att].dropna().tolist())
                 for att in self.log.numerical_atts:
                     if att in case_full.columns:
                         numerical[att].extend(case_full[att].dropna().tolist())
@@ -69,7 +73,9 @@ class PropertyComputer:
                 for att in self.log.numerical_atts:
                     if att in case_full.columns:
                         try:
-                            numerical_per_case[att].append(case_full[att].astype(float).dropna().max() - case_full[att].astype(float).dropna().min())
+                            num = case_full[att].astype(float).dropna().max() - case_full[att].astype(float).dropna().min()
+                            if not math.isnan(num):
+                                numerical_per_case[att].append(num)
                         except TypeError:
                             idx += 1
                             print(att, case_full[att].dropna().unique())
@@ -82,11 +88,19 @@ class PropertyComputer:
 
                 min_idx = min(indices)
                 max_idx = max(indices)
+
+                if max_idx < len(case_full_all)/2:
+                    categorical[PART_OF_CASE].append("first half")
+                else:
+                    categorical[PART_OF_CASE].append("second half")
                 # check which types of events can happen before or after a group in a case
                 if min_idx > 0:
                     categorical[PREDECESSORS].append(case_full_all.iloc[min_idx - 1][XES_NAME])
                 if max_idx < len(case_full_all) - 1:
                     categorical[SUCCESSORS].append(case_full_all.iloc[max_idx + 1][XES_NAME])
+
+                # positions within the trace
+                numerical[EVENT_POS_IN_CASE].append(max(indices) - min(indices))
 
             # print(idx, "cases ar affected in clust", clust)
             for att in categorical.keys():
@@ -102,8 +116,16 @@ class PropertyComputer:
         #print(att)
         unique, counts = np.unique(group_props[att], return_counts=True)
         distribution_group = dict(zip(unique, counts))
-
-        unique, counts = np.unique(self.log.pd_log[att].dropna(), return_counts=True)
+        if att == PREDECESSORS or att == SUCCESSORS:
+            unique, counts = np.unique(self.log.pd_log[XES_NAME].dropna(), return_counts=True)
+        elif att == PART_OF_CASE:
+            max_num_group = max(distribution_group.values())
+            for et, cnt in distribution_group.items():
+                if cnt < (self.config.noise_tau * max_num_group):
+                    group_prop_set[att].remove(et)
+            return
+        else:
+            unique, counts = np.unique(self.log.pd_log[att].dropna(), return_counts=True)
         distribution_log = dict(zip(unique, counts))
         if len(distribution_log.values()) > 0 and len(distribution_group.values()) > 0:
             max_num_group = max(distribution_group.values())

@@ -11,7 +11,8 @@ tqdm
 
 pandas==1.4.2
 matplotlib==3.5.1
-hdbscan
-kneed
-plotly
-streamlit
+hdbscan~=0.8.28
+kneed~=0.7.0
+plotly~=5.8.0
+streamlit~=1.9.0
+networkx~=2.8

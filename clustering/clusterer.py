@@ -18,9 +18,9 @@ from write.writer import write_linkage_matrix
 
 class Clusterer:
 
-    def __init__(self, pd_events_fv, config):
+    def __init__(self, log, config):
         # properties
-        self.pd_events_fv = pd_events_fv
+        self.log = log
         self.config = config
         self._pred_labels = None
         self.elbow = None
@@ -62,7 +62,7 @@ class Clusterer:
         sils = dict()
         wcss = dict()
         temp_labels = dict()
-        for curr_clust in range(int(len(self.pd_events_fv[XES_NAME_DF].unique()) * .5), int(n_clusters * 1.5), 3):
+        for curr_clust in range(int(len(self.log.pd_fv[XES_NAME_DF].unique()) * .5), int(len(self.log.pd_log[XES_NAME].unique()) * 1.5), 5):
             kms = KMeans(n_clusters=curr_clust, init='k-means++', random_state=42, algorithm="elkan")
             kms = kms.fit(vector_norm)
             pred_labels = kms.labels_
