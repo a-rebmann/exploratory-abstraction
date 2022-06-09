@@ -7,6 +7,7 @@ XES_RESOURCE = "org:resource"
 XES_GROUP = "org:group"
 XES_ROLE = "org:role"
 XES_CASE = "case:" + XES_NAME
+XES_INST = "concept:instance"
 
 MOBIS_ROLE = "type"
 

@@ -12,6 +12,9 @@ DURATION_TEMPLATE_RANGE = "The {dur} of this group of events is between {min_val
 
 EVENTS_PER_CASE = "There are {num} events per case {addition}. "
 
+def round_up(n, decimals=0):
+    multiplier = 10 ** decimals
+    return math.ceil(n * multiplier) / multiplier
 
 class TextGen:
 
@@ -40,7 +43,7 @@ class TextGen:
         # TODO decide on which text to include in the description
 
         self.generate_event_types_text(clustering, clust, categorical_set[XES_NAME])
-        self.generate_event_stats_text(clustering, clust, categorical_per_case[XES_NAME])
+        self.generate_event_stats_text(clustering, clust, categorical_per_case[XES_INST])
 
         # Group-wide properties
         if XES_RESOURCE in self.log.categorical_atts:
@@ -140,7 +143,7 @@ class TextGen:
         if all(x == 1 for x in resources):
             text = 'Per case, all events are executed by the same resource. '
         else:
-            rounded_avg = int(sum(resources) / len(resources))
+            rounded_avg = round_up(sum(resources) / len(resources), 1)
             text = 'Per case, events are executed by ' + str(rounded_avg) + ' different resources on average. '
         self._description[clustering][clust] += text
 
@@ -152,23 +155,22 @@ class TextGen:
         if all(x == 1 for x in roles):
             text = 'Per case, all events are executed by the same role. '
         else:
-            rounded_avg = int(sum(roles) / len(roles))
+            rounded_avg = round_up(sum(roles) / len(roles), 1)
             text = 'Per case, events are executed by ' + str(rounded_avg) + ' different roles on average. '
         self._description[clustering][clust] += text
 
     def generate_cat_atts_text_per_case(self, clustering, clust, cat_atts):
         text = ""
         for att, items in cat_atts.items():
-            print(clust, att)
+            #print(clust, att)
             if att not in self.clust_to_att_distinct_per_case[clust] and att not in self.clust_to_atts_unique[clust]:
                 continue
             if len(items) == 0 or "case:" in att:
                 continue
             if att in [XES_NAME, XES_RESOURCE, XES_ROLE]:
                 continue
-            rounded_avg = int(sum(items) / len(items))
-            text += "There are " + str(rounded_avg) + " different values on average for " + att + " in this group, per " \
-                                                                                                  "case. "
+            rounded_avg = round_up(sum(items) / len(items), 1)
+            text += "There are " + str(rounded_avg) + " different values on average for " + att + " in this group, per case. "
         self._description[clustering][clust] += text
 
     def generate_num_atts_text_per_case(self, clustering, clust, num_atts):
@@ -230,15 +232,12 @@ class TextGen:
 
     def generate_event_stats_text(self, clustering, clust, events_per_case):
         num = int(sum(events_per_case) / len(events_per_case))
-        if num > 1:
-            text = EVENTS_PER_CASE.format(addition="on average", num=int(sum(events_per_case) / len(events_per_case)))
-        else:
-            text = "There is one event per case. "
+        if num > 0:
+            text = EVENTS_PER_CASE.format(addition="on average", num=round_up(sum(events_per_case) / len(events_per_case), 1))
         self._description[clustering][clust] += text
 
     def generate_position_in_cases(self, clustering, clust, positional_ranges):
         text = ""
         if not len(positional_ranges) == 0:
-            text += "Within individual cases, the events of this group occur in positions between " + str(min(positional_ranges)) + " and " + str(max(positional_ranges)) + ". "
+            text += "Within individual cases, the events of this group occur within a sequence of " + str(min(positional_ranges)) + " and " + str(max(positional_ranges)) + " events. "
             self._description[clustering][clust] += text
-        self._description[clustering][clust] += text

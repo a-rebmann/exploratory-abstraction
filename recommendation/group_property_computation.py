@@ -44,6 +44,7 @@ class PropertyComputer:
 
             numerical_per_case = {att: [] for att in self.log.numerical_atts}
             categorical_per_case = {att: [] for att in self.log.categorical_atts}
+            categorical_per_case[XES_INST] = []
 
             time_per_case = {DURATION: []}
             idx = 0
@@ -59,17 +60,17 @@ class PropertyComputer:
                     print(clust, indices, len(events_per_case.iloc[0][TRACE_DF]))
                     continue
                 case_full_all = events_per_case.iloc[0][TRACE_DF]
-
+                categorical_per_case[XES_INST].append(len(indices))
                 for att in self.log.categorical_atts:
                     if att in case_full.columns:
                         if "ID" not in att and not att[-2:] == "id":
                             categorical[att].extend(case_full[att].dropna().tolist())
                 for att in self.log.numerical_atts:
                     if att in case_full.columns:
-                        numerical[att].extend(case_full[att].dropna().tolist())
+                        numerical[att].extend(case_full[att].astype(float).dropna().tolist())
                 for att in self.log.categorical_atts:
                     if att in case_full.columns:
-                        categorical_per_case[att].append(len(case_full[att].dropna()))
+                        categorical_per_case[att].append(len(case_full[att].dropna().unique()))
                 for att in self.log.numerical_atts:
                     if att in case_full.columns:
                         try:
@@ -109,7 +110,7 @@ class PropertyComputer:
                     self.remove_noise(categorical, categorical_set, att)
 
             clust_to_props[clust] = categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case
-
+        print(categorical_per_case)
         return clust_to_props
 
     def remove_noise(self, group_props, group_prop_set, att):

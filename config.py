@@ -13,7 +13,7 @@ class Config:
         self.sim_metric = sim_metric
         self.noise_tau = noise_tau
         self.multi_clustering = multi_clustering
-        self.dim_red = dim_red
+        self.dim_red = dim_red if dim_red else "None"
         self.comp = comp
 
     def __repr__(self):

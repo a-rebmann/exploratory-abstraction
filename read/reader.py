@@ -65,3 +65,12 @@ def load_result(config):
             return pickled_res, True
     except FileNotFoundError:
         return None, False
+
+
+def deserialize_clustering(config):
+    try:
+        with open(os.path.join(config.out_path, str(config) + '_clusterer.pkl'), 'rb') as f:
+            pickled_res = pickle.load(f)
+            return pickled_res, True
+    except FileNotFoundError:
+        return None, False
