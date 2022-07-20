@@ -27,8 +27,8 @@ BPI17_REP = "MPPNTaskAbstractionBPIC2017_pd_cases_fv_fine_1"
 
 
 SIM_NAME = "EventLog_LowLevel_v2.csv"
-SIM_REP = "MPPNMultiTaskAbstractionSynthetic_concept-name_org-roletime-timestamp_pd_cases_fv_fine"
-SIM_ATT_MAPPING = {XES_CASE: XES_CASE, XES_NAME: XES_NAME, XES_ROLE: XES_ROLE, XES_RESOURCE: XES_RESOURCE, XES_TIME: XES_TIME+":end"}
+SIM_REP = "MPPNMultiTaskAbstractionSynthetic_concept-name_org-role_org-resourcetime-timestamp_pd_cases_fv_fine"
+SIM_ATT_MAPPING = {XES_CASE: XES_CASE, XES_NAME: XES_NAME, XES_ROLE: XES_ROLE, XES_RESOURCE: XES_RESOURCE, XES_TIME: XES_TIME+":start"}
 
 
 def main(config):
