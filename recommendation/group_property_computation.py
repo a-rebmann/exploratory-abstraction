@@ -24,7 +24,7 @@ class PropertyComputer:
     def compute_props_for_clustering(self, col):
         col_name = CLUST_COL + str(col) if self.config.multi_clustering else CLUST_COL
         clust_to_props = {}
-        print(self.log.pd_fv[col_name].unique())
+        #print(self.log.pd_fv[col_name].unique())
         for clust, events in self.log.pd_fv.groupby(col_name):
             numerical = {att: [] for att in self.log.numerical_atts}
             categorical = {att: [] for att in self.log.categorical_atts}
@@ -61,6 +61,7 @@ class PropertyComputer:
                     continue
                 case_full_all = events_per_case.iloc[0][TRACE_DF]
                 categorical_per_case[XES_INST].append(len(indices))
+                #instances = self.split_instances(case_full)
                 for att in self.log.categorical_atts:
                     if att in case_full.columns:
                         if "ID" not in att and not att[-2:] == "id":
@@ -104,17 +105,24 @@ class PropertyComputer:
                 numerical[EVENT_POS_IN_CASE].append(max(indices) - min(indices))
 
             # print(idx, "cases ar affected in clust", clust)
+            time_per_case[DURATION] = self.remove_noise_numerical_per_case(time_per_case[DURATION])
             for att in categorical.keys():
                 categorical_set[att] = set(categorical[att])
                 if self.config.noise_tau > 0:
                     self.remove_noise(categorical, categorical_set, att)
 
             clust_to_props[clust] = categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case
-        print(categorical_per_case)
+        #print(categorical_per_case)
         return clust_to_props
 
+    def remove_noise_numerical_per_case(self, num_list):
+        num_list.sort()
+        num_list = num_list[:int(len(num_list)*(1-self.config.noise_tau)-1)]
+        return num_list
+
+
     def remove_noise(self, group_props, group_prop_set, att):
-        #print(att)
+        print(att)
         unique, counts = np.unique(group_props[att], return_counts=True)
         distribution_group = dict(zip(unique, counts))
         if att == PREDECESSORS or att == SUCCESSORS:

@@ -26,6 +26,11 @@ BPI17_NAME = "BPI Challenge 2017.xes"
 BPI17_REP = "MPPNTaskAbstractionBPIC2017_pd_cases_fv_fine_1"
 
 
+SIM_NAME = "EventLog_LowLevel_v2.csv"
+SIM_REP = "MPPNMultiTaskAbstractionSynthetic_concept-name_org-roletime-timestamp_pd_cases_fv_fine"
+SIM_ATT_MAPPING = {XES_CASE: XES_CASE, XES_NAME: XES_NAME, XES_ROLE: XES_ROLE, XES_RESOURCE: XES_RESOURCE, XES_TIME: XES_TIME+":end"}
+
+
 def main(config):
     result, loaded_res = reader.load_result(config)
     if loaded_res:
@@ -42,13 +47,13 @@ def main(config):
     # then read the leaned representations
     pd_events_fv, loaded = reader.load_mppn_representations(config)
     if loaded:
-        if len(pd_events_fv) > 100000:
+        if len(pd_events_fv) > 500000:
             print("filtering due to size")
             cases = list(pd_log[XES_CASE].unique())
             filtered = random.choices(cases, k=1000)
             to_remove = []
             for f in filtered:
-                if len(pd_events_fv[pd_events_fv[XES_CASE] == int(f.replace("Application_", ""))]) != len(
+                if len(pd_events_fv[pd_events_fv[XES_CASE] == int(str(f).replace("Application_", ""))]) != len(
                         pd_log[pd_log[XES_CASE] == f]):
                     # print(f, "!!!", len(pd_events_fv[pd_events_fv[XES_CASE] == int(f.replace("Application_", ""))]), len(pd_log[pd_log[XES_CASE] == f]))
                     to_remove.append(f)
@@ -62,7 +67,7 @@ def main(config):
             cases = list(pd_log[XES_CASE].unique())
             to_remove = []
             for f in cases:
-                if len(pd_events_fv[pd_events_fv[XES_CASE] == int(f.replace("Application_", ""))]) != len(
+                if len(pd_events_fv[pd_events_fv[XES_CASE] == int(str(f).replace("Application_", ""))]) != len(
                         pd_log[pd_log[XES_CASE] == f]):
                     # print(f, "!!!", len(pd_events_fv[pd_events_fv[XES_CASE] == int(f.replace("Application_", ""))]), len(pd_log[pd_log[XES_CASE] == f]))
                     to_remove.append(f)
@@ -81,13 +86,13 @@ def main(config):
         tic = time.perf_counter()
 
         clust, clust_is_there = reader.deserialize_clustering(config)
-        if False:
+        if clust_is_there:
             # TODO fix this
             pass
         else:
             if config.dim_red == PCA_S:
                 # Do PCA
-                dim_red_df, dim_red_rep = preprocessing.pca(log.pd_fv, comp=2)
+                dim_red_df, dim_red_rep = preprocessing.pca(log.pd_fv, comp=config.comp)
                 toc = time.perf_counter()
                 print(f"PCA done in {toc - tic:0.4f} seconds")
             elif config.dim_red == TSNE_S:
@@ -116,7 +121,7 @@ def main(config):
         else:
             pd_events_fv[CLUST_COL] = clust.pred_labels
             pd_events_fv[CLUST_COL] = pd_events_fv[CLUST_COL].astype(int)
-        # pd_events_fv.to_csv(config.out_path + config.log_name + "_c.csv")
+        pd_events_fv.to_csv(config.out_path + config.log_name + "_c.csv")
         tic = time.perf_counter()
         # Compute key properties
         props = PropertyComputer(log, config, clust)
@@ -151,16 +156,16 @@ def main(config):
         # Retrieve most similar events
         # retrieve_most_similar_events(pd_events_fv, 5523, 1, top_n=5)
     else:
-        print(config.log_name, "could not be loaded")
+        print(config.rep_name, "could not be loaded")
         return None
 
 
-base_config = Config("input/", "output/", BPI17_NAME, {}, BPI17_REP, clust="k_means", noise_tau=0.05,
-                     multi_clustering=True, dim_red=PCA_S, comp=2)
+base_config = Config("input/", "output/", SIM_NAME, SIM_ATT_MAPPING, SIM_REP, clust="k_means", noise_tau=0.2,
+                     multi_clustering=False, dim_red=PCA_S, comp=.99, with_ranker=False)
 
-LOGS = [(BPI17_NAME, BPI17_REP, {}), (MOBIS_NAME, MOBIS_REP, MOBIS_ATT_MAPPING)]
+LOGS = [(SIM_NAME, SIM_REP, SIM_ATT_MAPPING)]#[(BPI17_NAME, BPI17_REP, {}), (MOBIS_NAME, MOBIS_REP, MOBIS_ATT_MAPPING)]
 CLUST = ["k_means"]
-NOISE_TAU = [0, 0.05, 0.1, 0.2]
+NOISE_TAU = [0.2]
 DIM_RED = [None, PCA_S, TSNE_S]
 COMPS = [2, 3, 0.95, 0.99]
 
@@ -173,16 +178,16 @@ def evaluate():
         conf = Config("input/", "output/", log_name=raw_config[0][0],
                       att_names=raw_config[0][2], rep_name=raw_config[0][1],
                       clust=raw_config[1], noise_tau=raw_config[2],
-                      dim_red=raw_config[3], comp=raw_config[4])
-        if conf.log_name == BPI17_NAME and conf.noise_tau == 0.0 and conf.dim_red =="None" and conf.comp == 0.99:  # or conf.log_name == BPI17_NAME and conf.noise_tau == 0 and conf.dim_red==TSNE_S and conf.comp == 2 or conf.log_name == BPI17_NAME and conf.noise_tau == 0.2 and conf.dim_red==TSNE_S and conf.comp == 0.95:
-            main(conf)
+                      dim_red=raw_config[3], comp=raw_config[4], with_ranker=False)
+        #if conf.log_name == BPI17_NAME and conf.noise_tau == 0.0 and conf.dim_red == "None" and conf.comp == 0.99:  # or conf.log_name == BPI17_NAME and conf.noise_tau == 0 and conf.dim_red==TSNE_S and conf.comp == 2 or conf.log_name == BPI17_NAME and conf.noise_tau == 0.2 and conf.dim_red==TSNE_S and conf.comp == 0.95:
+        main(conf)
         # break
 
 
 if __name__ == '__main__':
     main_tic = time.perf_counter()
-    # main(base_config)
-    evaluate()
+    main(base_config)
+    #evaluate()
 
     main_toc = time.perf_counter()
     print(f"Program finished all operations in {main_toc - main_tic:0.4f} seconds")

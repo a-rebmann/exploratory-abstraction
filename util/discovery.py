@@ -7,9 +7,12 @@ from const import XES_LIFECYCLE, XES_NAME, XES_CASE, START_TOK, END_TOK
 
 
 def get_dfg_concurrency(log):
+    if XES_LIFECYCLE not in log.columns or len(log[XES_LIFECYCLE].unique())<=1:
+        return get_dfg_classic(log)
     dfgs = list()
     sa = dict()
     ea = dict()
+
     for case, events in log.groupby(XES_CASE):
         prev = None
         for index, row in events.iterrows():

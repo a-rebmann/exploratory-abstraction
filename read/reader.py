@@ -15,6 +15,7 @@ def load_mppn_representations(config):
             pd_events_fv[EVENT_POS_IN_CASE] = pd_events_fv[EVENT_POS_IN_CASE] - 1
             return pd_events_fv, True
     except FileNotFoundError:
+        print("not found")
         return None, False
 
 
@@ -47,7 +48,8 @@ def read_csv_log(config):
         pd_log.rename(columns={"case:travel_start": "travel_start"}, inplace=True)
     if "case:travel_end" in pd_log.columns:
         pd_log.rename(columns={"case:travel_end": "travel_end"}, inplace=True)
-
+    if XES_LIFECYCLE not in pd_log.columns:
+        pd_log[XES_LIFECYCLE] = "start" #TODO not standrad but needed for interfacing with FVs
     return pd_log
 
 
@@ -55,6 +57,8 @@ def read_xes_log(config):
     log = importer.apply(os.path.join(config.in_path, config.log_name))
     pd_log = converter.apply(log, variant=converter.Variants.TO_DATA_FRAME)
     pd_log = pd_log.groupby(XES_CASE).head(65)
+    if XES_LIFECYCLE not in pd_log.columns:
+        pd_log[XES_LIFECYCLE] = "complete"
     return pd_log
 
 

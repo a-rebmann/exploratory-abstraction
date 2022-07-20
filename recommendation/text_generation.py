@@ -8,17 +8,20 @@ COUNT_RES_TEMPLATE = "The events are executed by {count} different {name}. "
 
 DURATION_TEMPLATE = "The {dur} is {value} per case. "
 
-DURATION_TEMPLATE_RANGE = "The {dur} of this group of events is between {min_value} and {max_value} per case. "
+DURATION_TEMPLATE_RANGE = "The {dur} of this group of events is at most {max_value} per case. "
 
 EVENTS_PER_CASE = "There are {num} events per case {addition}. "
+
 
 def round_up(n, decimals=0):
     multiplier = 10 ** decimals
     return math.ceil(n * multiplier) / multiplier
 
+
 class TextGen:
 
-    def __init__(self, log, clust_to_prop, clust_to_atts_unique, clust_to_atts_distinct, clust_to_att_distinct_per_case, config):
+    def __init__(self, log, clust_to_prop, clust_to_atts_unique, clust_to_atts_distinct, clust_to_att_distinct_per_case,
+                 config):
         self.log = log
         self.clus_to_prop = clust_to_prop
         self.clust_to_atts_unique = clust_to_atts_unique
@@ -31,8 +34,9 @@ class TextGen:
         for clustering in self.clus_to_prop.keys():
             self._description[clustering] = {}
             for clust, (
-            categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case) in \
-            self.clus_to_prop[clustering].items():
+                    categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case,
+                    time_per_case) in \
+                    self.clus_to_prop[clustering].items():
                 self.generate_description_for_cluster(clustering, clust, categorical, categorical_set, numerical, time,
                                                       categorical_per_case, numerical_per_case, time_per_case)
                 # print(clust, event_types)
@@ -76,7 +80,8 @@ class TextGen:
 
     def generate_resources_text(self, clustering, clust, resources):
         text = COUNT_RES_TEMPLATE.format(name="resources", count=len(resources))
-        if XES_RESOURCE not in self.clust_to_atts_unique[clust] and XES_RESOURCE not in self.clust_to_att_distinct_per_case[clust]:
+        if self.config.with_ranker and XES_RESOURCE not in self.clust_to_atts_unique[clust] and XES_RESOURCE not in \
+                self.clust_to_att_distinct_per_case[clust]:
             return
         if 'None' in resources:
             resources.remove('None')
@@ -89,7 +94,8 @@ class TextGen:
 
     def generate_roles_text(self, clustering, clust, roles):
         text = COUNT_RES_TEMPLATE.format(name="roles", count=len(roles))
-        if XES_ROLE not in self.clust_to_atts_unique[clust] and XES_RESOURCE not in self.clust_to_att_distinct_per_case[clust]:
+        if self.config.with_ranker and XES_ROLE not in self.clust_to_atts_unique[clust] and XES_RESOURCE not in self.clust_to_att_distinct_per_case[
+            clust]:
             return
         if 'None' in roles:
             roles.remove('None')
@@ -103,7 +109,8 @@ class TextGen:
     def generate_cat_atts_text(self, clustering, clust, cat_atts):
         text = ""
         for att, items in cat_atts.items():
-            if att not in self.clust_to_atts_unique[clust] and att not in self.clust_to_att_distinct_per_case[clust] and att not in self.clust_to_atts_distinct[clust]:
+            if self.config.with_ranker and att not in self.clust_to_atts_unique[clust] and att not in self.clust_to_att_distinct_per_case[
+                clust] and att not in self.clust_to_atts_distinct[clust]:
                 continue
             if len(items) == 0:
                 continue
@@ -121,7 +128,7 @@ class TextGen:
     def generate_num_atts_text(self, clustering, clust, num_atts):
         text = ""
         for att, items in num_atts.items():
-            if att not in self.clust_to_att_distinct_per_case[clust] and att not in self.clust_to_atts_distinct[clust]:
+            if self.config.with_ranker and att not in self.clust_to_att_distinct_per_case[clust] and att not in self.clust_to_atts_distinct[clust]:
                 continue
             if len(items) == 0:
                 continue
@@ -129,14 +136,15 @@ class TextGen:
                 continue
             # TODO add generic text
             text += att + " has the following value range in this group: " + str(min(items)).replace("{",
-                                                                                               "").replace(
+                                                                                                     "").replace(
                 "}", "") + " - " + str(max(items)).replace("{",
-                                                                                               "").replace(
+                                                           "").replace(
                 "}", "") + ". "
         self._description[clustering][clust] += text
 
     def generate_resources_text_per_case(self, clustering, clust, resources):
-        if XES_RESOURCE not in self.clust_to_att_distinct_per_case[clust] and XES_RESOURCE not in self.clust_to_atts_unique[clust]:
+        if self.config.with_ranker and XES_RESOURCE not in self.clust_to_att_distinct_per_case[clust] and XES_RESOURCE not in \
+                self.clust_to_atts_unique[clust]:
             return
         if 'None' in resources:
             resources.remove('None')
@@ -148,7 +156,8 @@ class TextGen:
         self._description[clustering][clust] += text
 
     def generate_roles_text_per_case(self, clustering, clust, roles):
-        if XES_ROLE not in self.clust_to_att_distinct_per_case[clust] and XES_ROLE not in self.clust_to_atts_unique[clust]:
+        if self.config.with_ranker and XES_ROLE not in self.clust_to_att_distinct_per_case[clust] and XES_ROLE not in self.clust_to_atts_unique[
+            clust]:
             return
         if 'None' in roles:
             roles.remove('None')
@@ -162,44 +171,46 @@ class TextGen:
     def generate_cat_atts_text_per_case(self, clustering, clust, cat_atts):
         text = ""
         for att, items in cat_atts.items():
-            #print(clust, att)
-            if att not in self.clust_to_att_distinct_per_case[clust] and att not in self.clust_to_atts_unique[clust]:
+            # print(clust, att)
+            if self.config.with_ranker and att not in self.clust_to_att_distinct_per_case[clust] and att not in self.clust_to_atts_unique[clust]:
                 continue
             if len(items) == 0 or "case:" in att:
                 continue
             if att in [XES_NAME, XES_RESOURCE, XES_ROLE]:
                 continue
             rounded_avg = round_up(sum(items) / len(items), 1)
-            text += "There are " + str(rounded_avg) + " different values on average for " + att + " in this group, per case. "
+            text += "There are " + str(
+                rounded_avg) + " different values on average for " + att + " in this group, per case. "
         self._description[clustering][clust] += text
 
     def generate_num_atts_text_per_case(self, clustering, clust, num_atts):
         text = ""
         for att, items in num_atts.items():
 
-            if att not in self.clust_to_att_distinct_per_case[clust]:
+            if self.config.with_ranker and att not in self.clust_to_att_distinct_per_case[clust]:
                 continue
             if len(items) == 0 or "case:" in att:
                 continue
             rounded_avg = sum(items) / len(items)
             if math.isnan(rounded_avg):
                 continue
-            text = 'Per case, events have an average value range of ' + "{:.2f}".format(rounded_avg) + " for " + att + ". "
+            text = 'Per case, events have an average value range of ' + "{:.2f}".format(
+                rounded_avg) + " for " + att + ". "
         self._description[clustering][clust] += text
 
     def generate_preceeding_text(self, clustering, clust, preceded_by):
         text = ""
-        if PREDECESSORS not in self.clust_to_atts_distinct[clust] and XES_ROLE not in self.clust_to_atts_unique[clust]:
+        if self.config.with_ranker and PREDECESSORS not in self.clust_to_atts_distinct[clust] and XES_ROLE not in self.clust_to_atts_unique[clust]:
             return
         if len(preceded_by) == 1:
             text += "The group is always preceded by " + str(preceded_by).replace("{",
-                                                                                                          "").replace(
+                                                                                  "").replace(
                 "}", "") + ". "
         self._description[clustering][clust] += text
 
     def generate_followed_by_text(self, clustering, clust, followed_by):
         text = ""
-        if SUCCESSORS not in self.clust_to_atts_distinct[clust] and SUCCESSORS not in self.clust_to_atts_unique[clust]:
+        if self.config.with_ranker and SUCCESSORS not in self.clust_to_atts_distinct[clust] and SUCCESSORS not in self.clust_to_atts_unique[clust]:
             return
         if len(followed_by) == 1:
             text += "The group is always followed by " + str(followed_by).replace("{",
@@ -221,7 +232,7 @@ class TextGen:
         if min(time_per_case[DURATION]) == timedelta(seconds=0):
             min_dur = "O seconds"
 
-        text = DURATION_TEMPLATE_RANGE.format(dur="duration", min_value=min_dur, max_value=max_dur)
+        text = DURATION_TEMPLATE_RANGE.format(dur="duration", max_value=max_dur)
         self._description[clustering][clust] += text
         # text = DURATION_TEMPLATE.format(dur="average duration", value=avg_dur_per_case) #TODO average
         # self._description[clustering][clust] += text
@@ -233,11 +244,13 @@ class TextGen:
     def generate_event_stats_text(self, clustering, clust, events_per_case):
         num = int(sum(events_per_case) / len(events_per_case))
         if num > 0:
-            text = EVENTS_PER_CASE.format(addition="on average", num=round_up(sum(events_per_case) / len(events_per_case), 1))
+            text = EVENTS_PER_CASE.format(addition="on average",
+                                          num=round_up(sum(events_per_case) / len(events_per_case), 1))
         self._description[clustering][clust] += text
 
     def generate_position_in_cases(self, clustering, clust, positional_ranges):
         text = ""
         if not len(positional_ranges) == 0:
-            text += "Within individual cases, the events of this group occur within a sequence of " + str(min(positional_ranges)) + " and " + str(max(positional_ranges)) + " events. "
+            text += "Within individual cases, the events of this group occur within a sequence of " + str(
+                min(positional_ranges)) + " and " + str(max(positional_ranges)) + " events. "
             self._description[clustering][clust] += text
