@@ -62,7 +62,7 @@ class Clusterer:
         sils = dict()
         wcss = dict()
         temp_labels = dict()
-        for curr_clust in range(int(len(self.log.pd_fv[XES_NAME_DF].unique()) * .5), int(len(self.log.pd_log[XES_NAME].unique()) * 1.5), 5):#in [12]:
+        for curr_clust in range(int(len(self.log.pd_fv[XES_NAME_DF].unique()) * .5), int(len(self.log.pd_log[XES_NAME].unique()) * 1.5), 2):#in [12]:
             kms = KMeans(n_clusters=curr_clust, init='k-means++', random_state=42, algorithm="elkan")
             kms = kms.fit(vector_norm)
             pred_labels = kms.labels_

@@ -16,49 +16,50 @@ from sklearn import preprocessing
 from util.discovery import get_dfg_concurrency, to_real_simple_graph, get_dfg_classic, get_density
 
 
-class Ranker:
+class PreSelector:
 
     def __init__(self, log, config, clust_to_props):
         self.config = config
         self.clust_to_props = clust_to_props
         self.log = log
 
-
     def create_ranking(self):
         distinct = self.rank_by_distinctness()
         print(distinct)
-        distinct_per_case = self.rank_by_distinctness_per_case()
-        print(distinct_per_case)
+        # distinct_per_case = self.rank_by_distinctness_per_case()
+        # print(distinct_per_case)
+        unique_per_case = self.rank_by_uniqueness_per_case()
+        print(unique_per_case)
         unique = self.rank_by_uniqueness()
         print(unique)
-        comp_red = self.rank_by_abstraction_impact()
+        comp_red = dict()  # self.rank_by_abstraction_impact()
 
         clust_to_att_unique = dict()
         clust_to_att_distinct = dict()
-        clust_to_att_distinct_per_case = dict()
+        clust_to_att_unique_per_case = dict()
 
-        won_distinct_per_case = dict()
-        for clustering, att_to_clust in distinct_per_case.items():
+        won_unique_per_case = dict()
+        for clustering, att_to_clust in unique_per_case.items():
             for clust in self.clust_to_props[clustering].keys():
-                clust_to_att_distinct_per_case[clust] = set()
-                won_distinct_per_case[clust] = 1
+                clust_to_att_unique_per_case[clust] = set()
+                won_unique_per_case[clust] = 0
             for att, clust_to_score in att_to_clust[0].items():
                 # print(clust_to_score)
-                best_clust = max(clust_to_score, key=lambda x: clust_to_score[x])
-                won_distinct_per_case[best_clust] += 1
-                clust_to_att_distinct_per_case[best_clust].add(att)
+                best_clust = min(clust_to_score, key=lambda x: clust_to_score[x])
+                won_unique_per_case[best_clust] += 1
+                clust_to_att_unique_per_case[best_clust].add(att)
             for att, clust_to_score in att_to_clust[1].items():
                 # print(clust_to_score)
-                best_clust = max(clust_to_score, key=lambda x: clust_to_score[x])
-                won_distinct_per_case[best_clust] += 1
-                clust_to_att_distinct_per_case[best_clust].add(att)
-        print(won_distinct_per_case)
+                best_clust = min(clust_to_score, key=lambda x: clust_to_score[x])
+                won_unique_per_case[best_clust] += 1
+                clust_to_att_unique_per_case[best_clust].add(att)
+        print(won_unique_per_case)
 
         won_distinct = dict()
         for clustering, att_to_clust in distinct.items():
             for clust in self.clust_to_props[clustering].keys():
                 clust_to_att_distinct[clust] = set()
-                won_distinct[clust] = 1
+                won_distinct[clust] = 0
             for att, clust_to_score in att_to_clust[0].items():
                 # print(clust_to_score)
                 best_clust = max(clust_to_score, key=lambda x: clust_to_score[x])
@@ -81,12 +82,15 @@ class Ranker:
         for clustering, att_to_clust in unique.items():
             for clust in self.clust_to_props[clustering].keys():
                 clust_to_att_unique[clust] = set()
-                won_unique[clust] = 1
+                won_unique[clust] = 0
             for att, clust_to_score in att_to_clust[0].items():
-                # print(clust_to_score)
-                best_clust = max(clust_to_score, key=lambda x: clust_to_score[x])
-                won_unique[best_clust] += 1
-                clust_to_att_unique[best_clust].add(att)
+                print(att, clust_to_score)
+                best_clust = min(clust_to_score, key=lambda x: clust_to_score[x])
+                best_score = min(clust_to_score.values())
+                for clusti, scori in clust_to_score.items():
+                    if scori == best_score:
+                        won_unique[clusti] += 1
+                        clust_to_att_unique[clusti].add(att)
             for att, clust_to_score in att_to_clust[1].items():
                 # print(clust_to_score)
                 best_clust = min(clust_to_score, key=lambda x: clust_to_score[x])
@@ -95,9 +99,9 @@ class Ranker:
         print(won_unique)
         print(clust_to_att_unique)
         print(clust_to_att_distinct)
-        print(clust_to_att_distinct_per_case)
+        print(clust_to_att_unique_per_case)
         print("individual scores done")
-        return clust_to_att_unique, clust_to_att_distinct, clust_to_att_distinct_per_case, comp_red
+        return clust_to_att_unique, clust_to_att_distinct, clust_to_att_unique_per_case, comp_red
 
     def rank_by_uniqueness(self):
         unique = {}
@@ -106,15 +110,27 @@ class Ranker:
             num_ranges = dict()
             num_vars = dict()
             for clust, (
-            categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case) in \
-            self.clust_to_props[clustering].items():
+                    categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case,
+                    time_per_case) in \
+                    self.clust_to_props[clustering].items():
+
                 for att, item_set in categorical_set.items():
+                    if att in ["predecessors", "successors", "part_of_case", "event_pos", 'concept:instance'] or len(
+                            self.log.pd_log[att].unique()) <= 2:
+                        continue
                     if att == XES_NAME and len(item_set) == 1:
+                        print("skipping", att)
+                        continue
+                    if len(categorical_set[XES_NAME]) == len(self.log.pd_log[XES_NAME].unique()):
+                        print("skipping", att)
                         continue
                     if att not in cat_lens:
                         cat_lens[att] = dict()
                     cat_lens[att][clust] = len(item_set)
                 for att, item_set in numerical.items():
+                    if att in ["predecessors", "successors", "part_of_case", "event_pos", 'concept:instance'] or len(
+                            self.log.pd_log[att].unique()) <= 2:
+                        continue
                     if att not in num_vars:
                         num_vars[att] = dict()
                     if len(item_set) > 1:
@@ -142,15 +158,24 @@ class Ranker:
             cat_emd = dict()
             num_ranges = dict()
             for clust1, (
-            categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case) in \
-            self.clust_to_props[clustering].items():
+                    categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case,
+                    time_per_case) in \
+                    self.clust_to_props[clustering].items():
                 for att in categorical_set.keys():
+                    if att in ["predecessors", "successors", "part_of_case", "event_pos", 'concept:instance'] or len(
+                            self.log.pd_log[att].unique()) <= 2:
+                        continue
+                    if att == XES_NAME and len(categorical_set[att]) == 1:
+                        print("skipping", att)
+                        continue
+
                     if att not in cat_emd:
                         cat_emd[att] = dict()
                     emd_sum = 0
                     for clust2, (
-                    categorical2, categorical_set2, numerical2, time2, categorical_per_case2, numerical_per_case2,
-                    time_per_case2) in self.clust_to_props[clustering].items():
+                            categorical2, categorical_set2, numerical2, time2, categorical_per_case2,
+                            numerical_per_case2,
+                            time_per_case2) in self.clust_to_props[clustering].items():
                         if len(categorical_set[att]) > 0 and len(categorical_set2[att]) > 0:
                             if att == PART_OF_CASE:
                                 continue
@@ -165,12 +190,18 @@ class Ranker:
                             emd_sum += ev_type_emd
                     cat_emd[att][clust1] = emd_sum
                 for att in numerical_per_case.keys():
+                    if att in ["predecessors", "successors", "part_of_case", "event_pos", 'concept:instance'] or len(
+                            self.log.pd_log[att].unique()) <= 2:
+                        continue
+                    if att in [XES_INST] or len(self.log.pd_log[att].unique()) <= 2:
+                        continue
                     if att not in num_ranges:
                         num_ranges[att] = dict()
                     emd_sum = 0
                     for clust2, (
-                    categorical2, categorical_set2, numerical2, time2, categorical_per_case2, numerical_per_case2,
-                    time_per_case2) in self.clust_to_props[clustering].items():
+                            categorical2, categorical_set2, numerical2, time2, categorical_per_case2,
+                            numerical_per_case2,
+                            time_per_case2) in self.clust_to_props[clustering].items():
                         if len(numerical_per_case[att]) > 0 and len(numerical_per_case2[att]) > 0:
                             ev_type_emd = wasserstein_distance(numerical_per_case[att], numerical_per_case2[att])
                             emd_sum += ev_type_emd
@@ -182,59 +213,42 @@ class Ranker:
             distinct[clustering] = (cat_emd, num_ranges)
         return distinct
 
-    def rank_by_abstraction_impact(self):
-        complexity_red = dict()
-        for clustering in self.clust_to_props.keys():
-            for clust1 in self.clust_to_props[clustering].keys():
-                abstractor = Abstractor(self.log, self.config, [clust1],
-                                        CLUST_COL + (str(clustering) if self.config.multi_clustering else ""))
-                abstracted_log = abstractor.apply_abstraction()
-                dfg_low_level, sa_l, ea_l = get_dfg_concurrency(self.log.pd_log)
-                dfg_abstracted, sa_a, ea_a = get_dfg_concurrency(abstracted_log)
-                i_dfg = to_real_simple_graph(dfg_low_level, sa_l, ea_l)
-                o_dfg = to_real_simple_graph(dfg_abstracted, sa_a, ea_a)
-                complexity_red[clust1] = get_density(i_dfg) - get_density(o_dfg)
-                print("{:.2f}".format(complexity_red[clust1]), clust1)
-        return complexity_red
-
-    def rank_by_distinctness_per_case(self):
-        distinct = {}
+    def rank_by_uniqueness_per_case(self):
+        unique = {}
         for clustering in self.clust_to_props.keys():
             cat_emd = dict()
             num_ranges = dict()
             for clust1, (
-            categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case) in \
-            self.clust_to_props[clustering].items():
+                    categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case,
+                    time_per_case) in \
+                    self.clust_to_props[clustering].items():
 
                 for att in categorical_per_case.keys():
+                    if att in ["predecessors", "successors", "part_of_case", "event_pos", 'concept:instance'] or len(
+                            self.log.pd_log[att].unique()) <= 2:
+                        continue
+
+
                     if att not in cat_emd:
                         cat_emd[att] = dict()
-                    dist_sum = 0
-                    for clust2, (
-                    categorical2, categorical_set2, numerical2, time2, categorical_per_case2, numerical_per_case2,
-                    time_per_case2) in self.clust_to_props[clustering].items():
-                        if len(categorical_per_case[att]) > 0 and len(categorical_per_case2[att]) > 0:
-                            if att == PART_OF_CASE:
-                                continue
-                            dist = abs((sum(categorical_per_case2[att]) / len(categorical_per_case2[att])) - (
-                                        sum(categorical_per_case[att]) / len(categorical_per_case[att])))
-                            dist_sum += dist
-                    cat_emd[att][clust1] = dist_sum
-
+                    dist = sum(categorical_per_case[att]) / len(categorical_per_case[att])
+                    if att == XES_NAME and dist == 1:
+                        print("skipping", att)
+                        continue
+                    cat_emd[att][clust1] = dist
                 for att in numerical_per_case.keys():
+                    if att in ["predecessors", "successors", "part_of_case", "event_pos", 'concept:instance'] or len(
+                            self.log.pd_log[att].unique()) <= 2:
+                        continue
+                    if att in [XES_INST] or len(self.log.pd_log[att].unique()) <= 2:
+                        continue
                     if att not in num_ranges:
                         num_ranges[att] = dict()
-                    dist_sum = 0
-                    for clust2, (
-                    categorical2, categorical_set2, numerical2, time2, categorical_per_case2, numerical_per_case2,
-                    time_per_case2) in self.clust_to_props[clustering].items():
-                        if len(numerical_per_case[att]) > 0 and len(numerical_per_case2[att]) > 0:
-                            dist = abs(mean(numerical_per_case[att]) - mean(numerical_per_case2[att]))
-                            dist_sum += dist
-                    num_ranges[att][clust1] = dist_sum
+                    dist = mean(numerical_per_case[att])
+                    num_ranges[att][clust1] = dist
                 for att in cat_emd.keys():
                     cat_emd[att] = dict(sorted(cat_emd[att].items(), key=lambda item: item[1], reverse=True))
                 for att in num_ranges.keys():
                     num_ranges[att] = dict(sorted(num_ranges[att].items(), key=lambda item: item[1], reverse=True))
-            distinct[clustering] = (cat_emd, num_ranges)
-        return distinct
+            unique[clustering] = (cat_emd, num_ranges)
+        return unique

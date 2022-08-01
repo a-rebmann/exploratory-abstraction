@@ -18,6 +18,9 @@ def round_up(n, decimals=0):
     return math.ceil(n * multiplier) / multiplier
 
 
+
+
+
 class TextGen:
 
     def __init__(self, log, clust_to_prop, clust_to_atts_unique, clust_to_atts_distinct, clust_to_att_distinct_per_case,
@@ -30,6 +33,9 @@ class TextGen:
         self._description = {}
         self.config = config
 
+    def check_if_group_is_interesting(self, clust):
+        return len(self.clust_to_att_distinct_per_case[clust])>0 or len(self.clust_to_atts_distinct[clust])>0 or len(self.clust_to_atts_unique[clust]) > 0
+
     def generate_descriptions_for_clusters(self):
         for clustering in self.clus_to_prop.keys():
             self._description[clustering] = {}
@@ -37,8 +43,11 @@ class TextGen:
                     categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case,
                     time_per_case) in \
                     self.clus_to_prop[clustering].items():
+                is_interesting = self.check_if_group_is_interesting(clust)
+                print("Checked interestingness of group ", clust, ": ", is_interesting)
+                #if is_interesting:
                 self.generate_description_for_cluster(clustering, clust, categorical, categorical_set, numerical, time,
-                                                      categorical_per_case, numerical_per_case, time_per_case)
+                                                  categorical_per_case, numerical_per_case, time_per_case)
                 # print(clust, event_types)
 
     def generate_description_for_cluster(self, clustering, clust, categorical, categorical_set, numerical, time,
@@ -71,7 +80,7 @@ class TextGen:
 
     def generate_event_types_text(self, clustering, clust, event_types):
         text = COUNT_TEMPLATE.format(name="event types", count=len(event_types))
-        if len(event_types) < 6:
+        if len(event_types) < 8:
             if len(event_types) == 1:
                 text = 'All events are of the ' + str(event_types).replace("{", "").replace("}", "") + ' type. '
             else:

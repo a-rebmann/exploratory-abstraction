@@ -9,6 +9,7 @@ class Log:
         self.pd_fv = pd_fv
         self.numerical_atts = set()
         self.categorical_atts = set()
+        self.other_atts = set()
         self.encoders = dict()
         self.init_log()
 
@@ -20,6 +21,10 @@ class Log:
                 print(column, "id an Event ID")
                 continue
             print(column, self.pd_log.dtypes[column])
+            if len(self.pd_log[column].unique()) <= 1 or column == "High Level Transition":
+                self.other_atts.add(column)
+                print("ignore", column)
+                continue
             if self.pd_log.dtypes[column] == 'datetime64' or 'datetime64' in str(self.pd_log.dtypes[column]) or \
                     self.pd_log[column].sample(n=50).dropna().apply(
                             lambda x: check_for_date(str(x))).all():

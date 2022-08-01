@@ -50,6 +50,8 @@ def read_csv_log(config):
         pd_log.rename(columns={"case:travel_end": "travel_end"}, inplace=True)
     if XES_LIFECYCLE not in pd_log.columns:
         pd_log[XES_LIFECYCLE] = "start" #TODO not standrad but needed for interfacing with FVs
+    if "isAccepted" in pd_log.columns:
+        pd_log["isAccepted"] = pd_log["isAccepted"].astype(bool)
     return pd_log
 
 

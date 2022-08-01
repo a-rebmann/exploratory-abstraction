@@ -22,10 +22,17 @@ class PropertyComputer:
         self._clust_to_prop = clustering_clust_to_props
 
     def compute_props_for_clustering(self, col):
+        self.log.pd_log["Noise"] = False
+
+        print("Start property computation")
         col_name = CLUST_COL + str(col) if self.config.multi_clustering else CLUST_COL
+        self.log.pd_log[col_name] = self.log.pd_fv[col_name]
         clust_to_props = {}
         #print(self.log.pd_fv[col_name].unique())
         for clust, events in self.log.pd_fv.groupby(col_name):
+            print(clust)
+            for act_name, evs in events.groupby(XES_NAME_DF):
+                print(act_name, len(evs))
             numerical = {att: [] for att in self.log.numerical_atts}
             categorical = {att: [] for att in self.log.categorical_atts}
             categorical[PREDECESSORS] = []
@@ -109,10 +116,12 @@ class PropertyComputer:
             for att in categorical.keys():
                 categorical_set[att] = set(categorical[att])
                 if self.config.noise_tau > 0:
-                    self.remove_noise(categorical, categorical_set, att)
+                    self.remove_noise(col_name, clust, categorical, categorical_set, att)
 
             clust_to_props[clust] = categorical, categorical_set, numerical, time, categorical_per_case, numerical_per_case, time_per_case
         #print(categorical_per_case)
+        print("End property computation")
+
         return clust_to_props
 
     def remove_noise_numerical_per_case(self, num_list):
@@ -121,8 +130,8 @@ class PropertyComputer:
         return num_list
 
 
-    def remove_noise(self, group_props, group_prop_set, att):
-        print(att)
+    def remove_noise(self, clust_col, clust, group_props, group_prop_set, att):
+        #print(att)
         unique, counts = np.unique(group_props[att], return_counts=True)
         distribution_group = dict(zip(unique, counts))
         if att == PREDECESSORS or att == SUCCESSORS:
@@ -132,6 +141,7 @@ class PropertyComputer:
             for et, cnt in distribution_group.items():
                 if cnt < (self.config.noise_tau * max_num_group):
                     group_prop_set[att].remove(et)
+
             return
         else:
             unique, counts = np.unique(self.log.pd_log[att].dropna(), return_counts=True)
@@ -143,6 +153,8 @@ class PropertyComputer:
             for et, cnt in distribution_group.items():
                 if (cnt / distribution_log[et]) < (self.config.noise_tau * (max_num_group / max_num_log)):
                     group_prop_set[att].remove(et)
+                    if att in self.log.pd_log.columns:
+                        self.log.pd_log.loc[(self.log.pd_log[att] >= et) & (self.log.pd_log[clust_col] == clust), "Noise"] = True
 
     @property
     def clust_to_prop(self):
