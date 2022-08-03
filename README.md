@@ -12,10 +12,12 @@ multi-perspective contexts. To achieve this, our approach learns representations
 of events that capture this context and automatically identifies and suggests in-
 teresting groups of related events. The user can inspect group descriptions and
 select meaningful groups to abstract the low-level log. 
+
+The simulation models and scenario description used in the proof of concept can be found in the notebook <code>simulationmodels.ipynb</code>
 ## Setup
 1. create virtual env
 2. install requirements in requirements.txt via pip
-3. Place the <a href="">trained representations</a> in the <code>input</code> directory
+3. Place the <a href="https://www.dropbox.com/s/cltxwb2dik203mc/MPPNMultiTaskAbstractionSynthetic_v3_concept-name_org-role_org-resource_isComplete_isAccepted__time-timestamp_big_pd_cases_fv_fine.pkl?dl=0">trained representations</a> in the <code>input</code> directory
 ## Usage
 run <code>main.py</code>
 
