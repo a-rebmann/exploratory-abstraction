@@ -29,7 +29,7 @@ class PreSelector:
         # distinct_per_case = self.rank_by_distinctness_per_case()
         # print(distinct_per_case)
         unique_per_case = self.rank_by_uniqueness_per_case()
-        print(unique_per_case)
+        #print(unique_per_case)
         unique = self.rank_by_uniqueness()
         #print(unique)
         comp_red = dict()  # self.rank_by_abstraction_impact()
@@ -96,10 +96,10 @@ class PreSelector:
                 best_clust = min(clust_to_score, key=lambda x: clust_to_score[x])
                 won_unique[best_clust] += 1
                 clust_to_att_unique[best_clust].add(att)
-        print(won_unique)
-        print(clust_to_att_unique)
-        print(clust_to_att_distinct)
-        print(clust_to_att_unique_per_case)
+        # print(won_unique)
+        # print(clust_to_att_unique)
+        # print(clust_to_att_distinct)
+        # print(clust_to_att_unique_per_case)
         print("individual scores done")
         return clust_to_att_unique, clust_to_att_distinct, clust_to_att_unique_per_case, comp_red
 

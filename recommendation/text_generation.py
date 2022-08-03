@@ -73,7 +73,7 @@ class TextGen:
         self.generate_num_atts_text_per_case(clustering, clust, numerical_per_case)
 
     def generate_event_types_text(self, clustering, clust, event_types):
-        text = COUNT_TEMPLATE.format(name="event types", count=len(event_types))
+        text = COUNT_TEMPLATE.format(name="event classes", count=len(event_types))
         if len(event_types) < 8:
             if len(event_types) == 1:
                 text = 'All events are of the ' + str(event_types).replace("{", "").replace("}", "") + ' type. '

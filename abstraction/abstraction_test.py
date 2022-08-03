@@ -38,4 +38,4 @@ def main(config):
     sys.exit(0)
 
 
-main(base_config)
+#main(base_config)
