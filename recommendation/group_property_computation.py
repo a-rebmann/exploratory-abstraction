@@ -30,9 +30,9 @@ class PropertyComputer:
         clust_to_props = {}
         #print(self.log.pd_fv[col_name].unique())
         for clust, events in self.log.pd_fv.groupby(col_name):
-            print(clust)
-            for act_name, evs in events.groupby(XES_NAME_DF):
-                print(act_name, len(evs))
+            #print(clust)
+            #for act_name, evs in events.groupby(XES_NAME_DF):
+            #    print(act_name, len(evs))
             numerical = {att: [] for att in self.log.numerical_atts}
             categorical = {att: [] for att in self.log.categorical_atts}
             categorical[PREDECESSORS] = []
@@ -154,7 +154,7 @@ class PropertyComputer:
                 if (cnt / distribution_log[et]) < (self.config.noise_tau * (max_num_group / max_num_log)):
                     group_prop_set[att].remove(et)
                     if att in self.log.pd_log.columns:
-                        self.log.pd_log.loc[(self.log.pd_log[att] >= et) & (self.log.pd_log[clust_col] == clust), "Noise"] = True
+                        self.log.pd_log.loc[(self.log.pd_log[att] == et) & (self.log.pd_log[clust_col] == clust), "Noise"] = True
 
     @property
     def clust_to_prop(self):

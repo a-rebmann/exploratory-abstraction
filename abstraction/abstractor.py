@@ -28,23 +28,24 @@ class Abstractor:
         abstracted_log[self.group_indicator_col] = self.log.pd_fv[self.group_indicator_col]
         #abstracted_log[XES_NAME] = abstracted_log[self.group_indicator_col]
         # create a column that contains new activity labels for the final log
-        abstracted_log = abstracted_log.loc[abstracted_log[self.group_indicator_col].isin(self.selection) & abstracted_log['Noise']==False]
+        abstracted_log = abstracted_log.loc[(abstracted_log[self.group_indicator_col].isin(self.selection)) & (~abstracted_log['Noise'])]
 
-        abstracted_log.loc[abstracted_log[self.group_indicator_col].isin(self.selection), XES_NAME] = \
-        abstracted_log.loc[abstracted_log[self.group_indicator_col].isin(self.selection)][self.group_indicator_col]
+        abstracted_log[XES_NAME] = abstracted_log[self.group_indicator_col]
+        #abstracted_log.loc[abstracted_log[self.group_indicator_col].isin(self.selection), XES_NAME] = \
+        #abstracted_log.loc[abstracted_log[self.group_indicator_col].isin(self.selection)][self.group_indicator_col]
 
         # create a column that contains new activity labels for the group by
-        abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection), self.group_indicator_col] = \
-            abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection)][XES_NAME].astype(str) + \
-        abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection)][XES_TIME].astype(str)
+        # abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection), self.group_indicator_col] = \
+        #     abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection)][XES_NAME].astype(str) + \
+        # abstracted_log.loc[~abstracted_log[self.group_indicator_col].isin(self.selection)][XES_TIME].astype(str)
 
         #abstracted_log.to_csv(self.config.out_path + self.config.log_name + "_d.csv")
 
         g = abstracted_log.groupby([XES_CASE, self.group_indicator_col])
-        abstracted_log.loc[g[XES_LIFECYCLE].head(1).index, XES_LIFECYCLE] = 'start'
+        #abstracted_log.loc[g[XES_LIFECYCLE].head(1).index, XES_LIFECYCLE] = 'start'
         abstracted_log.loc[g[XES_LIFECYCLE].tail(1).index, XES_LIFECYCLE] = 'complete'
-        # in each case retain only the first and last event of each group
-        abstracted_log = (pd.concat([g.head(1), g.tail(1)]).drop_duplicates().reset_index(drop=True)) #.sort_values(XES_TIME) sorting might cause the complete events before start events if duration=0
+        # in each case retain only the first and last event of each group g.head(1),
+        abstracted_log = (pd.concat([g.tail(1)]).drop_duplicates().reset_index(drop=True)) #.sort_values(XES_TIME) sorting might cause the complete events before start events if duration=0
         return abstracted_log
 
 

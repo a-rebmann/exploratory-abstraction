@@ -14,12 +14,13 @@ def write_linkage_matrix(config, linkage_matrix):
 
 
 def write_result_to_disk(config, text_gen):
-    with open(os.path.join(config.out_path,  str(config) + '_result.pkl'), 'wb') as f:
-        pickle.dump(text_gen, f)
-    f = open(os.path.join(config.out_path,  str(config) + '_text.txt'), "a")
+    #with open(os.path.join(config.out_path,  str(config) + '_result.pkl'), 'wb') as f:
+    #    pickle.dump(text_gen, f)
+    f = open(os.path.join(config.out_path,  str(config) + '_descriptions.txt'), "a")
     for clustering in text_gen.description.keys():
         for clust_num, clust_description in text_gen.description[clustering].items():
-            f.write(str(clust_num) + "       " + clust_description + "\n" + "\n")
+            if text_gen.check_if_group_is_interesting(clust_num):
+                f.write(str(clust_num) + "       " + clust_description + "\n" + "\n")
     f.close()
 
 

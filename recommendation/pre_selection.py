@@ -25,13 +25,13 @@ class PreSelector:
 
     def create_ranking(self):
         distinct = self.rank_by_distinctness()
-        print(distinct)
+        #print(distinct)
         # distinct_per_case = self.rank_by_distinctness_per_case()
         # print(distinct_per_case)
         unique_per_case = self.rank_by_uniqueness_per_case()
         print(unique_per_case)
         unique = self.rank_by_uniqueness()
-        print(unique)
+        #print(unique)
         comp_red = dict()  # self.rank_by_abstraction_impact()
 
         clust_to_att_unique = dict()
@@ -84,8 +84,8 @@ class PreSelector:
                 clust_to_att_unique[clust] = set()
                 won_unique[clust] = 0
             for att, clust_to_score in att_to_clust[0].items():
-                print(att, clust_to_score)
-                best_clust = min(clust_to_score, key=lambda x: clust_to_score[x])
+                #print(att, clust_to_score)
+                #best_clust = min(clust_to_score, key=lambda x: clust_to_score[x])
                 best_score = min(clust_to_score.values())
                 for clusti, scori in clust_to_score.items():
                     if scori == best_score:
@@ -119,10 +119,10 @@ class PreSelector:
                             self.log.pd_log[att].unique()) <= 2:
                         continue
                     if att == XES_NAME and len(item_set) == 1:
-                        print("skipping", att)
+                        #print("skipping", att)
                         continue
                     if len(categorical_set[XES_NAME]) == len(self.log.pd_log[XES_NAME].unique()):
-                        print("skipping", att)
+                        #print("skipping", att)
                         continue
                     if att not in cat_lens:
                         cat_lens[att] = dict()
@@ -166,7 +166,7 @@ class PreSelector:
                             self.log.pd_log[att].unique()) <= 2:
                         continue
                     if att == XES_NAME and len(categorical_set[att]) == 1:
-                        print("skipping", att)
+                        #print("skipping", att)
                         continue
 
                     if att not in cat_emd:
@@ -224,16 +224,14 @@ class PreSelector:
                     self.clust_to_props[clustering].items():
 
                 for att in categorical_per_case.keys():
-                    if att in ["predecessors", "successors", "part_of_case", "event_pos", 'concept:instance'] or len(
+                    if att in [XES_NAME, "predecessors", "successors", "part_of_case", "event_pos", 'concept:instance'] or len(
                             self.log.pd_log[att].unique()) <= 2:
                         continue
-
-
                     if att not in cat_emd:
                         cat_emd[att] = dict()
                     dist = sum(categorical_per_case[att]) / len(categorical_per_case[att])
                     if att == XES_NAME and dist == 1:
-                        print("skipping", att)
+                        #print("skipping", att)
                         continue
                     cat_emd[att][clust1] = dist
                 for att in numerical_per_case.keys():

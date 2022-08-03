@@ -3,12 +3,11 @@ venvn/
 env/
 .idea/
 __pycache__/
-input/*
-output/*
 #input*.xes
-#input/*.pkl
-#output/*.pkl
-#output/*.xes
-#output/*.txt
+input/*.pkl
+output/*.pkl
+output/*.xes
+output/*.txt
+output/*.csv
 .DS_Store
 *2017*

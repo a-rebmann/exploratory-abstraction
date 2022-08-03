@@ -18,9 +18,9 @@ class Log:
             if column == XES_CASE:
                 continue
             if len(self.pd_log[column].unique()) == len(self.pd_log):
-                print(column, "id an Event ID")
+                #print(column, "id an Event ID")
                 continue
-            print(column, self.pd_log.dtypes[column])
+            #print(column, self.pd_log.dtypes[column])
             if len(self.pd_log[column].unique()) <= 1 or column == "High Level Transition":
                 self.other_atts.add(column)
                 print("ignore", column)

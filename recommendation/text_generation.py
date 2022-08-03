@@ -18,9 +18,6 @@ def round_up(n, decimals=0):
     return math.ceil(n * multiplier) / multiplier
 
 
-
-
-
 class TextGen:
 
     def __init__(self, log, clust_to_prop, clust_to_atts_unique, clust_to_atts_distinct, clust_to_att_distinct_per_case,
@@ -34,7 +31,7 @@ class TextGen:
         self.config = config
 
     def check_if_group_is_interesting(self, clust):
-        return len(self.clust_to_att_distinct_per_case[clust])>0 or len(self.clust_to_atts_distinct[clust])>0 or len(self.clust_to_atts_unique[clust]) > 0
+        return len(self.clust_to_att_distinct_per_case[clust]) > 0 or len(self.clust_to_atts_distinct[clust]) > 0 or len(self.clust_to_atts_unique[clust]) > 0
 
     def generate_descriptions_for_clusters(self):
         for clustering in self.clus_to_prop.keys():
@@ -44,7 +41,7 @@ class TextGen:
                     time_per_case) in \
                     self.clus_to_prop[clustering].items():
                 is_interesting = self.check_if_group_is_interesting(clust)
-                print("Checked interestingness of group ", clust, ": ", is_interesting)
+                print("Group ", clust, "suggested?  ", is_interesting)
                 #if is_interesting:
                 self.generate_description_for_cluster(clustering, clust, categorical, categorical_set, numerical, time,
                                                   categorical_per_case, numerical_per_case, time_per_case)
@@ -53,11 +50,8 @@ class TextGen:
     def generate_description_for_cluster(self, clustering, clust, categorical, categorical_set, numerical, time,
                                          categorical_per_case, numerical_per_case, time_per_case):
         self._description[clustering][clust] = ""
-        # TODO decide on which text to include in the description
-
         self.generate_event_types_text(clustering, clust, categorical_set[XES_NAME])
         self.generate_event_stats_text(clustering, clust, categorical_per_case[XES_INST])
-
         # Group-wide properties
         if XES_RESOURCE in self.log.categorical_atts:
             self.generate_resources_text(clustering, clust, categorical_set[XES_RESOURCE])
@@ -185,7 +179,7 @@ class TextGen:
                 continue
             if len(items) == 0 or "case:" in att:
                 continue
-            if att in [XES_NAME, XES_RESOURCE, XES_ROLE]:
+            if att in [XES_NAME, XES_RESOURCE, XES_ROLE, XES_INST]:
                 continue
             rounded_avg = round_up(sum(items) / len(items), 1)
             text += "There are " + str(
