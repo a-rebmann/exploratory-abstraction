@@ -1,10 +1,21 @@
-# Exploratory Abstraction
+# Multi-perspective Identification of Event Groups
+for Event Abstraction
 
-Approach for exploratory event abstraction
+Prototype of the appproach presetned in <i>Rebmann, A., Pfeiffer, P., Fettke, P., and van der Aa, H.: Multi-perspective Identification of Event Groups
+for Event Abstraction</i> uder submission for the Third International Workshop on Event Data and 
+Behavioral Analytics.
 
 ## About
-..
+An approach that suggests multi-perspective groups of low-level events for event abstraction. 
+It does not require the user to provide input upfront, but allows them
+to inspect and select groups of events that are related based on their common
+multi-perspective contexts. To achieve this, our approach learns representations
+of events that capture this context and automatically identifies and suggests in-
+teresting groups of related events. The user can inspect group descriptions and
+select meaningful groups to abstract the low-level log.
 ## Setup
-..
+1. create virtual env
+2. install requirements in requirements.txt via pip
+3. Place the trained representations in the <code>input</code> directory
 ## Usage
-..
+run <code>main.py</code>
