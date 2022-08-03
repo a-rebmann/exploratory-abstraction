@@ -13,7 +13,7 @@ of events that capture this context and automatically identifies and suggests in
 teresting groups of related events. The user can inspect group descriptions and
 select meaningful groups to abstract the low-level log. 
 
-The simulation models and scenario description used in the proof of concept can be found in the notebook <code>simulationmodels.ipynb</code>
+The scenario description and models to generate the data used in the proof of concept can be found in the notebook <code>simulationmodels.ipynb</code>
 ## Setup
 1. create virtual env
 2. install requirements in requirements.txt via pip
