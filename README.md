@@ -1,6 +1,6 @@
 # Multi-perspective Identification of Event Groups for Event Abstraction
 
-Prototype of the appproach presetned in <i>Rebmann, A., Pfeiffer, P., Fettke, P., and van der Aa, H.: Multi-perspective Identification of Event Groups
+Prototype of the appproach presented in <i>Rebmann, A., Pfeiffer, P., Fettke, P., and van der Aa, H.: Multi-perspective Identification of Event Groups
 for Event Abstraction</i> under submission for the Third International Workshop on Event Data and 
 Behavioral Analytics.
 
