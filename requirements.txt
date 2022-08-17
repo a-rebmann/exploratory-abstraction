@@ -8,6 +8,7 @@ scikit-learn~=1.0.1
 fastcluster~=1.2.6
 spacy
 tqdm
+transitions
 
 pandas==1.4.2
 matplotlib==3.5.1
