@@ -19,6 +19,11 @@ The high-level model looks like this
 
 ![High-level Petri net from the paper](https://github.com/a-rebmann/exploratory-abstraction/blob/main/high-level.png?raw=true)
 
+The low-level one looks like this
+
+![Low-level Petri net used to simulate the event log used in the proof of concept](https://github.com/a-rebmann/exploratory-abstraction/blob/main/low-level.png?raw=true)
+
+
 Note, that the code for training the MPPN in the masked attribute task cannot be included in this repository. 
 Thus, we provide the set R of representations for download (see below).
 If you are interested in the code, please contact <i>peter.pfeiffer@dfki.de</i>.
