@@ -17,7 +17,7 @@ The scenario description and models to generate the data used in the proof of co
 
 The high-level model looks like this
 
-![alt text](https://github.com/a-rebmann/exploratory-abstraction/blob/master/high-level.png?raw=true)
+![High-level Petri net from the paper](https://github.com/a-rebmann/exploratory-abstraction/blob/main/high-level.png?raw=true)
 
 Note, that the code for training the MPPN in the masked attribute task cannot be included in this repository. 
 Thus, we provide the set R of representations for download (see below).
