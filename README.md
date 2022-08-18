@@ -14,7 +14,7 @@ teresting groups of related events. The user can inspect group descriptions and
 select meaningful groups to abstract the low-level log. 
 
 The scenario description and models to generate the data used in the proof of concept can be found in the notebook 
-<code>simulationmodels.ipynb</code>
+<code>simulationmodels.ipynb</code>, to create the event log use the notebook <code>simulation/simulation_event_abstraction.ipynb</code>
 
 Note, that the code for training the MPPN in the masked attribute task cannot be made public. Thus, we provide the set R of representations for download.
 If you are interested in the code, please contact <i>peter.pfeiffer@dfki.de</i>.
