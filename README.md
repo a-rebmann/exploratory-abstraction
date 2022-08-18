@@ -1,5 +1,7 @@
 # Multi-perspective Identification of Event Groups for Event Abstraction
-<small>Written by Adrian Rebmann <i>rebmann@uni-mannheim.de</i></small>
+<sub>
+written by <a href="mailto:rebmann@uni-mannheim.de">Adrian Rebmann</a><br />
+</sub>
 
 Prototype of the appproach presented in 
 <i>Rebmann, A., Pfeiffer, P., Fettke, P., and van der Aa, H.: Multi-perspective Identification of Event Groups
