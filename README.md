@@ -9,14 +9,18 @@ An approach that suggests multi-perspective groups of low-level events for event
 It does not require the user to provide input upfront, but allows them
 to inspect and select groups of events that are related based on their common
 multi-perspective contexts. To achieve this, our approach learns representations
-of events that capture this context and automatically identifies and suggests in-
-teresting groups of related events. The user can inspect group descriptions and
-select meaningful groups to abstract the low-level log. 
+of events that capture this context and automatically identifies and suggests interesting groups of related events. 
+The user can inspect group descriptions and select meaningful groups to abstract the low-level log. 
 
 The scenario description and models to generate the data used in the proof of concept can be found in the notebook 
 <code>simulationmodels.ipynb</code>, to create the event log use the notebook <code>simulation/simulation_event_abstraction.ipynb</code>
 
-Note, that the code for training the MPPN in the masked attribute task cannot be made public. Thus, we provide the set R of representations for download.
+The high-level model looks like this
+
+![alt text](https://github.com/a-rebmann/exploratory-abstraction/blob/master/high-level.png?raw=true)
+
+Note, that the code for training the MPPN in the masked attribute task cannot be included in this repository. 
+Thus, we provide the set R of representations for download (see below).
 If you are interested in the code, please contact <i>peter.pfeiffer@dfki.de</i>.
 
 ## Setup
