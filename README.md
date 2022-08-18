@@ -3,9 +3,11 @@
 written by <a href="mailto:rebmann@uni-mannheim.de">Adrian Rebmann</a><br />
 </sub>
 
+<p>
 Prototype of the appproach presented in 
 <i>Rebmann, A., Pfeiffer, P., Fettke, P., and van der Aa, H.: Multi-perspective Identification of Event Groups
 for Event Abstraction</i> under submission for the Third International Workshop on Event Data and Behavioral Analytics.
+</p>
 
 ## About
 An approach that suggests multi-perspective groups of low-level events for event abstraction. 
