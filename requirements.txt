@@ -1,12 +1,8 @@
 pm4py~=2.2.20.1
-gensim~=4.1.2
-nltk~=3.6.6
-lxml~=4.7.1
 numpy~=1.21.5
 scipy~=1.7.3
 scikit-learn~=1.0.1
 fastcluster~=1.2.6
-spacy
 tqdm
 transitions
 
@@ -15,5 +11,4 @@ matplotlib==3.5.1
 hdbscan~=0.8.28
 kneed~=0.7.0
 plotly~=5.8.0
-streamlit~=1.9.0
 networkx~=2.8
