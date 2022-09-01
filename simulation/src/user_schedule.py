@@ -1,4 +1,3 @@
-from calendar import weekday
 import datetime
 import random
 import src.simulation_util as simulation
@@ -14,11 +13,12 @@ class User_schedule:
         self.user_pool = {}
 
     def get_order_intervall(self, day):
-        if self.order_intervall == {}: return (1800, 3600, 4500)
-        else: return self.order_intervall[day]
+        if self.order_intervall == {}:
+            return (1800, 3600, 4500)
+        else:
+            return self.order_intervall[day]
 
     def set_order_intervall(self, day, intervall):
-
         self.order_intervall[day] = intervall    
     
     def add_user_shift(self, organizational_unit, begin, end):
