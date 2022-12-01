@@ -9,6 +9,12 @@ XES_ROLE = "org:role"
 XES_CASE = "case:" + XES_NAME
 XES_INST = "concept:instance"
 
+LABEL = "Task"
+INDEX = "idx"
+OPERATIONS_ID = "operations_id"
+PRED_LABEL = "pred_label"
+TIMESTAMP = "timeStamp"
+
 MOBIS_ROLE = "type"
 
 PCA_S = "PCA"

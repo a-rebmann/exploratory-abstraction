@@ -138,12 +138,13 @@ NOISE_TAU = [0.2]
 DIM_RED = [PCA_S]
 COMPS = [0.99]
 
+INPUT, OUTPUT = "input/", "output/"
 
 def evaluate():
     prepare_configs = [LOGS, CLUST, NOISE_TAU, DIM_RED, COMPS]
     raw_configs = list(itertools.product(*prepare_configs))
     for raw_config in raw_configs:
-        conf = Config("input/", "output/", log_name=raw_config[0][0],
+        conf = Config(INPUT, OUTPUT, log_name=raw_config[0][0],
                       att_names=raw_config[0][2], rep_name=raw_config[0][1],
                       clust=raw_config[1], noise_tau=raw_config[2],
                       dim_red=raw_config[3], comp=raw_config[4], with_ranker=False)
